@@ -431,8 +431,6 @@ Deployed and validated in a live manufacturing environment over **8 weeks** (2 w
 
 ### Option A: Docker (Recommended)
 
-> **Known issue:** the backend image does not currently build because `npm run build` (`tsc`) reports type errors in `src/`. Until those are fixed, use Option B for the backend and run only the database services with Docker, as shown below.
-
 ```bash
 git clone https://github.com/gitswagata1/omnisync-ai.git
 cd omnisync-ai
@@ -442,9 +440,9 @@ cp .env.example .env
 docker compose up -d
 ```
 
-Once the build issue is fixed, this starts the backend API, dashboard, PostgreSQL, and Redis. The API is at `http://localhost:3000`, the dashboard at `http://localhost:3001`.
+This starts the backend API, dashboard, PostgreSQL, and Redis. The API is at `http://localhost:3000`, the dashboard at `http://localhost:3001`.
 
-To run only PostgreSQL and Redis for Option B:
+To run only PostgreSQL and Redis for Option B (the API and dashboard then run from source):
 
 ```bash
 docker compose up -d postgres redis
