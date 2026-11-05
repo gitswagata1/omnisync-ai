@@ -157,8 +157,7 @@ describe('Protected endpoints require authentication', () => {
 
     it(`${route.method.toUpperCase()} ${route.path} returns 200/201 with auth`, async () => {
       const app = buildApp();
-      const res = await request(app)
-        [route.method](route.path)
+      const res = await request(app)[route.method](route.path)
         .set('Authorization', 'Bearer test-token')
         .send({ contactPhone: '+91123', body: 'test' });
 

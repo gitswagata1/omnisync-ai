@@ -1,4 +1,5 @@
 import { Router, Response } from 'express';
+import { routeParam } from '../utils/params.js';
 import { z } from 'zod';
 import { prisma } from '../lib/prisma.js';
 import { addScheduleJob, removeScheduleJob } from '../services/scheduler-engine.js';
@@ -51,7 +52,7 @@ schedulesRouter.get(
         where.status = statusFilter;
       }
 
-      if (!(agent.permissions as string[]).includes('view_all')) {
+      if (!(agent.permissions).includes('view_all')) {
         where.OR = [
           { agentId: agent.id },
           { createdBy: agent.id },
@@ -68,7 +69,7 @@ schedulesRouter.get(
       });
 
       res.json({ schedules });
-    } catch (err) {
+    } catch {
       res.status(500).json({ error: 'Failed to fetch schedules' });
     }
   }
@@ -116,7 +117,7 @@ schedulesRouter.post(
       });
 
       res.status(201).json({ schedule });
-    } catch (err) {
+    } catch {
       res.status(500).json({ error: 'Failed to create schedule' });
     }
   }
@@ -128,7 +129,7 @@ schedulesRouter.patch(
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const schedule = await prisma.schedule.findUnique({
-        where: { id: req.params.id },
+        where: { id: routeParam(req.params.id) },
       });
 
       if (!schedule) {
@@ -164,7 +165,7 @@ schedulesRouter.patch(
       });
 
       res.json({ status: pausedState.toLowerCase() });
-    } catch (err) {
+    } catch {
       res.status(500).json({ error: 'Failed to pause schedule' });
     }
   }
@@ -176,7 +177,7 @@ schedulesRouter.patch(
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const schedule = await prisma.schedule.findUnique({
-        where: { id: req.params.id },
+        where: { id: routeParam(req.params.id) },
       });
 
       if (!schedule) {
@@ -213,7 +214,7 @@ schedulesRouter.patch(
       });
 
       res.json({ status: resumedState.toLowerCase() });
-    } catch (err) {
+    } catch {
       res.status(500).json({ error: 'Failed to resume schedule' });
     }
   }
@@ -225,7 +226,7 @@ schedulesRouter.delete(
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const schedule = await prisma.schedule.findUnique({
-        where: { id: req.params.id },
+        where: { id: routeParam(req.params.id) },
       });
 
       if (!schedule) {
@@ -261,7 +262,7 @@ schedulesRouter.delete(
       });
 
       res.json({ status: deletedState.toLowerCase() });
-    } catch (err) {
+    } catch {
       res.status(500).json({ error: 'Failed to delete schedule' });
     }
   }
@@ -273,13 +274,13 @@ schedulesRouter.get(
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const logs = await prisma.scheduleLog.findMany({
-        where: { scheduleId: req.params.id },
+        where: { scheduleId: routeParam(req.params.id) },
         orderBy: { executedAt: 'desc' },
         take: 50,
       });
 
       res.json({ logs });
-    } catch (err) {
+    } catch {
       res.status(500).json({ error: 'Failed to fetch logs' });
     }
   }

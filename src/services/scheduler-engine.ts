@@ -43,14 +43,20 @@ export function initSchedulerEngine(socketIo: SocketServer): void {
   scheduleQueue = new Queue<ScheduleJobData>('schedule-dispatch', config.redis.url);
   responseTimeoutQueue = new Queue<ResponseJobData>('response-timeout', config.redis.url);
 
-  scheduleQueue.process(processScheduleJob);
-  responseTimeoutQueue.process(processResponseTimeout);
+  scheduleQueue.process(processScheduleJob).catch((err: unknown) => {
+    logger.error(`Schedule queue processor failed: ${String(err)}`);
+  });
+  responseTimeoutQueue.process(processResponseTimeout).catch((err: unknown) => {
+    logger.error(`Response timeout processor failed: ${String(err)}`);
+  });
 
   scheduleQueue.on('failed', (job, err) => {
     logger.error(`Schedule job ${job.id} failed: ${err.message}`);
   });
 
-  loadSchedules();
+  loadSchedules().catch((err: unknown) => {
+    logger.error(`Failed to load schedules: ${String(err)}`);
+  });
   initDigestCrons();
 
   logger.info('Scheduler engine initialized');
@@ -309,7 +315,7 @@ export async function handleScheduleResponse(
     data: {
       responseReceived: true,
       responseAt: new Date(),
-      llmEvaluation: evaluation as unknown as Record<string, unknown>,
+      llmEvaluation: evaluation,
     },
   });
 
@@ -362,6 +368,8 @@ export async function handleScheduleResponse(
 
 function initDigestCrons(): void {
   // Daily EOD digest at 6:00 PM Mon-Sat
+  // node-cron does not await its callback; the body handles its own errors.
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   cron.schedule('0 18 * * 1-6', async () => {
     logger.info('Generating daily EOD digest');
     try {
@@ -376,7 +384,7 @@ function initDigestCrons(): void {
 
       const vpAgents = await prisma.agent.findMany({
         where: {
-          permissions: { path: '$', array_contains: 'view_all' },
+          permissions: { array_contains: ['view_all'] },
           status: 'active',
         },
       });
@@ -397,6 +405,8 @@ function initDigestCrons(): void {
   });
 
   // Weekly wrap-up Monday 9 AM
+  // node-cron does not await its callback; the body handles its own errors.
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   cron.schedule('0 9 * * 1', async () => {
     logger.info('Generating weekly wrap-up');
     try {
@@ -410,7 +420,7 @@ function initDigestCrons(): void {
 
       const vpAgents = await prisma.agent.findMany({
         where: {
-          permissions: { path: '$', array_contains: 'view_all' },
+          permissions: { array_contains: ['view_all'] },
           status: 'active',
         },
       });
@@ -426,6 +436,8 @@ function initDigestCrons(): void {
   });
 
   // Monthly report 1st of each month at 9 AM
+  // node-cron does not await its callback; the body handles its own errors.
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   cron.schedule('0 9 1 * *', async () => {
     logger.info('Generating monthly report');
     try {
@@ -440,7 +452,7 @@ function initDigestCrons(): void {
 
       const vpAgents = await prisma.agent.findMany({
         where: {
-          permissions: { path: '$', array_contains: 'view_all' },
+          permissions: { array_contains: ['view_all'] },
           status: 'active',
         },
       });

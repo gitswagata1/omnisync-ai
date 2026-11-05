@@ -50,7 +50,7 @@ io.on('connection', (socket) => {
   logger.info(`WebSocket connected: ${socket.id}`);
 
   socket.on('join_agent', (agentId: string) => {
-    socket.join(`agent:${agentId}`);
+    void socket.join(`agent:${agentId}`);
     logger.debug(`Socket ${socket.id} joined agent:${agentId}`);
   });
 

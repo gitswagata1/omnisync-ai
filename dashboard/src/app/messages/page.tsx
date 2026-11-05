@@ -3,10 +3,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { MessageSquare, Send, Mic, ArrowLeft, Zap, Tag } from 'lucide-react';
 import { api } from '@/lib/api';
-import { getSocket, connectSocket } from '@/lib/socket';
+import { connectSocket } from '@/lib/socket';
 import { cn, formatTime, timeAgo } from '@/lib/utils';
 import type { Contact, Message } from '@/lib/types';
-import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,23 +27,6 @@ export default function MessagesPage() {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [mobileShowThread, setMobileShowThread] = useState(false);
   const threadEndRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    loadContacts();
-    const socket = connectSocket();
-
-    socket.on('message_inbound', (msg: Message) => {
-      addMessage(msg);
-    });
-    socket.on('message_outbound', (msg: Message) => {
-      addMessage(msg);
-    });
-
-    return () => {
-      socket.off('message_inbound');
-      socket.off('message_outbound');
-    };
-  }, []);
 
   useEffect(() => {
     threadEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -109,6 +91,24 @@ export default function MessagesPage() {
   }
 
   const activeMessages = selectedContact ? conversations[selectedContact.id] || [] : [];
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- initial data load on mount; state is set after the async fetch resolves
+    loadContacts();
+    const socket = connectSocket();
+
+    socket.on('message_inbound', (msg: Message) => {
+      addMessage(msg);
+    });
+    socket.on('message_outbound', (msg: Message) => {
+      addMessage(msg);
+    });
+
+    return () => {
+      socket.off('message_inbound');
+      socket.off('message_outbound');
+    };
+  }, []);
 
   if (loading) {
     return (

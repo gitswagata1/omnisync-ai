@@ -11,6 +11,7 @@ export function Header() {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- theme is read from the DOM on mount; localStorage is unavailable during SSR
     setTheme(document.documentElement.classList.contains('light') ? 'light' : 'dark');
   }, []);
 
@@ -36,6 +37,7 @@ export function Header() {
     socket.on('schedule_error', onEvent);
     socket.on('schedule_executed', onEvent);
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- socket state is read from the live connection on mount
     setConnected(socket.connected);
 
     return () => {

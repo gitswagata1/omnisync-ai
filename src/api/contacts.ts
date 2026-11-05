@@ -1,4 +1,5 @@
 import { Router, Response } from 'express';
+import { routeParam } from '../utils/params.js';
 import { z } from 'zod';
 import { prisma } from '../lib/prisma.js';
 import { authMiddleware, AuthenticatedRequest } from '../middleware/auth.js';
@@ -24,7 +25,7 @@ contactsRouter.get(
 
       const contacts = await prisma.contact.findMany({
         where:
-          (agent.permissions as string[]).includes('view_all')
+          (agent.permissions).includes('view_all')
             ? {}
             : { departments: { has: agent.department } },
         include: {
@@ -34,7 +35,7 @@ contactsRouter.get(
       });
 
       res.json({ contacts });
-    } catch (err) {
+    } catch {
       res.status(500).json({ error: 'Failed to fetch contacts' });
     }
   }
@@ -87,7 +88,7 @@ contactsRouter.post(
       });
 
       res.status(201).json({ contact });
-    } catch (err) {
+    } catch {
       res.status(500).json({ error: 'Failed to create contact' });
     }
   }
@@ -101,7 +102,7 @@ contactsRouter.get(
       const agent = req.agent!;
 
       const contact = await prisma.contact.findUnique({
-        where: { id: req.params.id },
+        where: { id: routeParam(req.params.id) },
       });
 
       if (!contact) {
@@ -110,7 +111,7 @@ contactsRouter.get(
       }
 
       const hasAccess =
-        (agent.permissions as string[]).includes('view_all') ||
+        (agent.permissions).includes('view_all') ||
         contact.departments.includes(agent.department);
 
       if (!hasAccess) {
@@ -166,7 +167,7 @@ contactsRouter.get(
           recentEscalations: escalations,
         },
       });
-    } catch (err) {
+    } catch {
       res.status(500).json({ error: 'Failed to fetch context' });
     }
   }
@@ -178,7 +179,7 @@ contactsRouter.patch(
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const contact = await prisma.contact.findUnique({
-        where: { id: req.params.id },
+        where: { id: routeParam(req.params.id) },
       });
 
       if (!contact) {
@@ -187,7 +188,7 @@ contactsRouter.patch(
       }
 
       const updated = await prisma.contact.update({
-        where: { id: req.params.id },
+        where: { id: routeParam(req.params.id) },
         data: {
           name: req.body.name ?? contact.name,
           organization: req.body.organization ?? contact.organization,
@@ -198,7 +199,7 @@ contactsRouter.patch(
       });
 
       res.json({ contact: updated });
-    } catch (err) {
+    } catch {
       res.status(500).json({ error: 'Failed to update contact' });
     }
   }

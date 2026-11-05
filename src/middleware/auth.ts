@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import { config } from '../config/index.js';
 import { prisma } from '../lib/prisma.js';
 
@@ -58,6 +58,6 @@ export async function authMiddleware(
 
 export function generateToken(agentId: string): string {
   return jwt.sign({ agentId }, config.auth.jwtSecret, {
-    expiresIn: config.auth.jwtExpiry,
+    expiresIn: config.auth.jwtExpiry as SignOptions["expiresIn"],
   });
 }

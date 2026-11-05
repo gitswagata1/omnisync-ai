@@ -1,4 +1,5 @@
 import { Router, Response } from 'express';
+import { routeParam } from '../utils/params.js';
 import { z } from 'zod';
 import { prisma } from '../lib/prisma.js';
 import { multiplexOutbound } from '../services/message-router.js';
@@ -48,7 +49,7 @@ messagesRouter.get(
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const conversation = await prisma.conversation.findUnique({
-        where: { id: req.params.conversationId },
+        where: { id: routeParam(req.params.conversationId) },
         include: { contact: true },
       });
 
@@ -59,7 +60,7 @@ messagesRouter.get(
 
       const agent = req.agent!;
       const hasAccess =
-        (agent.permissions as string[]).includes('view_all') ||
+        (agent.permissions).includes('view_all') ||
         conversation.contact.departments.includes(agent.department);
 
       if (!hasAccess) {
@@ -94,7 +95,7 @@ messagesRouter.get(
         messages,
         pagination: { page, limit, total, pages: Math.ceil(total / limit) },
       });
-    } catch (err) {
+    } catch {
       res.status(500).json({ error: 'Failed to fetch messages' });
     }
   }

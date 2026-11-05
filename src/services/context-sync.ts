@@ -1,6 +1,7 @@
 import { prisma } from '../lib/prisma.js';
 import { logger } from '../utils/logger.js';
 import type { Server as SocketServer } from 'socket.io';
+import type { Prisma } from '@prisma/client';
 
 export type SyncEventType =
   | 'E_INBOUND'
@@ -154,7 +155,7 @@ export async function propagateSyncEvent(event: SyncEvent): Promise<void> {
 
     await prisma.contact.update({
       where: { id: contact.id },
-      data: { contextCard: updatedContextCard },
+      data: { contextCard: updatedContextCard as Prisma.InputJsonValue },
     });
   }
 
@@ -164,7 +165,7 @@ export async function propagateSyncEvent(event: SyncEvent): Promise<void> {
       action: `sync_${event.type.toLowerCase()}`,
       targetType: 'contact',
       targetId: contact.id,
-      metadata: delta,
+      metadata: delta as Prisma.InputJsonValue,
     },
   });
 }

@@ -1,17 +1,8 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import {
-  Calendar,
-  Plus,
-  Pause,
-  Play,
-  Trash2,
-  RefreshCw,
-  Clock,
-  X,
-} from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Calendar, Plus, Pause, Play, Trash2, RefreshCw } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

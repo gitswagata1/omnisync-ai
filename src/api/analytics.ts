@@ -1,4 +1,5 @@
 import { Router, Response } from 'express';
+import { routeParam } from '../utils/params.js';
 import { prisma } from '../lib/prisma.js';
 import { generateDigest } from '../services/llm-evaluator.js';
 import { authMiddleware, AuthenticatedRequest } from '../middleware/auth.js';
@@ -82,7 +83,7 @@ analyticsRouter.get(
           activeAgents: totalAgents,
         },
       });
-    } catch (err) {
+    } catch {
       res.status(500).json({ error: 'Failed to fetch dashboard metrics' });
     }
   }
@@ -93,7 +94,7 @@ analyticsRouter.get(
   authMiddleware,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const period = req.params.period;
+      const period = routeParam(req.params.period);
       const now = new Date();
       let start: Date;
 
@@ -128,7 +129,7 @@ analyticsRouter.get(
         end: now.toISOString(),
         digest,
       });
-    } catch (err) {
+    } catch {
       res.status(500).json({ error: 'Failed to generate digest' });
     }
   }
@@ -140,7 +141,7 @@ analyticsRouter.get(
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const agent = req.agent!;
-      if (!(agent.permissions as string[]).includes('view_all')) {
+      if (!(agent.permissions).includes('view_all')) {
         res.status(403).json({ error: 'Insufficient permissions' });
         return;
       }
@@ -161,7 +162,7 @@ analyticsRouter.get(
         logs,
         pagination: { page, limit, total, pages: Math.ceil(total / limit) },
       });
-    } catch (err) {
+    } catch {
       res.status(500).json({ error: 'Failed to fetch audit logs' });
     }
   }
