@@ -460,9 +460,9 @@ cp .env.example .env
 
 docker compose up -d postgres redis   # or run your own Postgres 16 and Redis 7
 
-npx prisma db push                    # the repo has no migration files yet
+npm run db:migrate                   # applies the Prisma migrations
 npm run db:seed                       # loads demo agents, contacts, and schedules
-npx tsx --env-file=.env src/index.ts  # starts the API on http://localhost:3000
+npm run dev                           # starts the API on http://localhost:3000
 
 # In a second terminal:
 cd dashboard
@@ -472,9 +472,9 @@ npm run dev -- -p 3001                # dashboard at http://localhost:3001
 ```
 
 Notes:
-- `npm run dev` runs `tsx watch src/index.ts`, which does not load `.env` by itself. The backend reads `JWT_SECRET` from `process.env`, so without `--env-file=.env` login fails with a 500 error. Use the command above or add `dotenv`.
+- The API loads `.env` at startup via `dotenv`.
 - The dashboard's default dev port is 3000, which is also the API port. Pass `-p 3001` when both run on one machine.
-- `npm run db:migrate` (`prisma migrate deploy`) requires migration files, which the repo does not include yet. Use `npx prisma db push` for a local database.
+- Schema changes go through Prisma migrations in `prisma/migrations/`. Create one with `npx prisma migrate dev --name <change>`.
 - Demo logins use the seeded agent IDs printed by `npm run db:seed` (for example `550e8400-e29b-41d4-a716-446655440001`).
 - The dashboard supports light and dark themes. Use the sun/moon button in the header; the choice is saved in the browser.
 
@@ -642,7 +642,7 @@ omnisync-ai/
 - [ ] ERP integration (SAP, Tally)
 - [ ] On-premises deployment option
 - [ ] Mobile dashboard app
-- [ ] Prisma migration files (the schema is currently applied with `prisma db push`)
+- [x] Prisma migration files
 - [ ] Hosted deployment of the API and dashboard
 
 <br/>
