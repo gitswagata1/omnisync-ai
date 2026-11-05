@@ -1,0 +1,67 @@
+# Render Blueprint for OmniSync AI.
+# Create it in Render: New > Blueprint, then select this repository and branch.
+#
+# Before the dashboard works for real users:
+# - Serve the API and dashboard from one site (for example app.<domain> and
+#   api.<domain>). Browsers block the SameSite=Lax session cookie across
+#   onrender.com hostnames. See the README deployment notes.
+# - Set DASHBOARD_ORIGIN on the API and NEXT_PUBLIC_API_URL on the dashboard
+#   to those URLs.
+services:
+  - type: web
+    name: omnisync-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    # Apply migrations, then start. The Prisma CLI is a runtime dependency.
+    startCommand: sh -c "npx prisma migrate deploy && node dist/index.js"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: omnisync-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: omnisync-redis
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: SYSTEM_SECRET
+        generateValue: true
+      - key: DASHBOARD_ORIGIN
+        sync: false
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
+      - key: WHATSAPP_ACCESS_TOKEN
+        sync: false
+      - key: WHATSAPP_APP_SECRET
+        sync: false
+      - key: WHATSAPP_VERIFY_TOKEN
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+
+  - type: web
+    name: omnisync-dashboard
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: ./dashboard
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        sync: false
+
+databases:
+  - name: omnisync-db
+    databaseName: omnisync
+    plan: free
+    postgresMajorVersion: "16"
+
+keyValue:
+  - name: omnisync-redis
+    plan: free
+    maxmemoryPolicy: noeviction
+    ipAllowList: []
