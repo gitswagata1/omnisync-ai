@@ -1,26 +1,66 @@
 <div align="center">
 
-# OmniSync AI
+```
+   ____                  _  _____                        _    ___ 
+  / __ \                (_)/ ____|                      / \  |_ _|
+ | |  | | _ __ ___  _ __ | (___  _   _ _ __   ___     / _ \  | | 
+ | |  | || '_ ` _ \| '_ \ \___ \| | | | '_ \ / __|  / ___ \ | | 
+ | |__| || | | | | | | | |____) | |_| | | | | (__  / /   \ \|___|
+  \____/ |_| |_| |_|_| |_|_____/ \__, |_| |_|\___| \_/     \_/   
+                                   __/ |                          
+                                  |___/                           
+```
 
 ### The Conversational Operating System for Enterprise Coordination
 
 *Eliminate the $100B Enterprise Coordination Tax — one WhatsApp message at a time.*
+
+<br/>
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/Status-Pilot%20Deployed-brightgreen.svg)]()
 [![Platform](https://img.shields.io/badge/Platform-WhatsApp%20Cloud%20API-25D366.svg)]()
 [![Node](https://img.shields.io/badge/Node.js-20%2B-339933.svg)]()
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6.svg)]()
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](Dockerfile)
 [![Patents](https://img.shields.io/badge/Patents-3%20Filed-orange.svg)](patents/)
 [![Research](https://img.shields.io/badge/IEEE%20Access-Under%20Review-purple.svg)](research/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-Welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![GitHub stars](https://img.shields.io/github/stars/gitswagata1/omnisync-ai?style=social)](https://github.com/gitswagata1/omnisync-ai)
+[![Last Commit](https://img.shields.io/github/last-commit/gitswagata1/omnisync-ai)](https://github.com/gitswagata1/omnisync-ai/commits/main)
 
 ---
 
 **OmniSync AI** is an enterprise-grade, multi-agent conversational operating system built on a single WhatsApp Business number. It replaces manual follow-ups, communication silos, and executive blind spots with autonomous scheduling, AI-driven response evaluation, and real-time cross-departmental synchronization.
 
-[Architecture](#architecture) · [Quickstart](#quickstart) · [Documentation](docs/) · [Research Paper](research/) · [Patents](patents/) · [Pitch Deck](pitch/) · [Contributing](#contributing)
+[Architecture](#architecture) · [Quickstart](#quickstart) · [Docker](#deployment) · [API Reference](docs/api-reference/endpoints.md) · [Research Paper](research/) · [Patents](patents/) · [Pitch Deck](pitch/) · [Contributing](#contributing)
 
 </div>
+
+<br/>
+
+---
+
+## Why OmniSync?
+
+<table>
+<tr>
+<td width="33%" align="center">
+<h3>Zero Adoption Friction</h3>
+<p>Runs natively inside WhatsApp — the app your workforce already uses 50+ times a day. No new software to install, no training sessions, no IT procurement cycles.</p>
+</td>
+<td width="33%" align="center">
+<h3>Autonomous, Not Reactive</h3>
+<p>Proactively sends reminders, evaluates responses with AI, auto-escalates overdue tasks, and generates executive digests — all without a human pressing "send."</p>
+</td>
+<td width="33%" align="center">
+<h3>One Number, Full Visibility</h3>
+<p>Every agent operates through a single business number with their own identity tag. Every client interaction is visible across departments. Zero silos.</p>
+</td>
+</tr>
+</table>
+
+<br/>
 
 ---
 
@@ -28,13 +68,15 @@
 
 Modern industrial enterprises hemorrhage operational efficiency through three systemic failures:
 
-| Failure | Impact | Example |
-|:--------|:-------|:--------|
+| Failure | Impact | Real-World Example |
+|:--------|:-------|:-------------------|
 | **Manual Follow-ups** | VPs spend 2-3 hrs/day chasing status updates. Maintenance deadlines slip silently. | Plant head calls 8 people every morning to assemble a picture of yesterday. |
 | **Communication Silos** | Client interactions trapped in personal chats. Duplicate outreach, conflicting commitments. | Mercedes tells Purchase about a delivery change — Sales sends a conflicting confirmation. |
 | **No Proactive Reporting** | Zero automated digests. Executive visibility requires manual assembly. | Monthly wrap-ups take 2 days to compile from scattered WhatsApp threads. |
 
-**We call this the Enterprise Coordination Tax.** It costs $100B+ globally across manufacturing, construction, healthcare, and professional services.
+> **We call this the Enterprise Coordination Tax.** It costs **$100B+ globally** across manufacturing, construction, healthcare, and professional services.
+
+<br/>
 
 ---
 
@@ -43,29 +85,37 @@ Modern industrial enterprises hemorrhage operational efficiency through three sy
 OmniSync AI operates as an intelligent layer over a single WhatsApp Business Cloud API endpoint:
 
 ```
-┌──────────────────────────────────────────────────────────────────────┐
-│                                                                      │
-│   One WhatsApp Number  ──►  Multiple Agents with Identity Tags       │
-│                              (Micro Turner | Swagata | Purchase)      │
-│                                                                      │
-│   ┌──────────────┐    ┌──────────────┐    ┌──────────────────────┐   │
-│   │  Autonomous   │    │  AI Response  │    │  Cross-Department    │   │
-│   │  Scheduler    │    │  Evaluator    │    │  Context Sync        │   │
-│   │              │    │              │    │                      │   │
-│   │  Cron-driven  │    │  LLM scores   │    │  Every interaction   │   │
-│   │  reminders,   │◄──►│  completeness │◄──►│  visible to all      │   │
-│   │  escalations, │    │  & compliance,│    │  relevant agents     │   │
-│   │  digests      │    │  auto-decides │    │  in real time        │   │
-│   └──────────────┘    └──────────────┘    └──────────────────────┘   │
-│                                                                      │
-│                    ▼              ▼                ▼                  │
-│              ┌─────────────────────────────────────────────┐         │
-│              │       Executive Intelligence Layer          │         │
-│              │  Auto-generated daily/weekly/monthly digests │         │
-│              │  delivered to VP's WhatsApp at 8 AM          │         │
-│              └─────────────────────────────────────────────┘         │
-│                                                                      │
-└──────────────────────────────────────────────────────────────────────┘
+                     ┌─────────────────────────────────────────────┐
+                     │           ONE WHATSAPP NUMBER               │
+                     │     Multiple Agents · Identity Tags         │
+                     │    (Micro Turner | Swagata | Purchase)      │
+                     └──────────────────┬──────────────────────────┘
+                                        │
+              ┌─────────────────────────┼─────────────────────────┐
+              │                         │                         │
+              ▼                         ▼                         ▼
+   ┌────────────────────┐  ┌────────────────────┐  ┌────────────────────┐
+   │   AUTONOMOUS        │  │   AI RESPONSE       │  │   CROSS-DEPARTMENT │
+   │   SCHEDULER         │  │   EVALUATOR          │  │   CONTEXT SYNC     │
+   │                     │  │                      │  │                    │
+   │  Cron-driven        │  │  LLM scores          │  │  Every interaction │
+   │  reminders &        │  │  completeness &      │  │  visible to all    │
+   │  escalation chains  │  │  compliance, then    │  │  relevant agents   │
+   │                     │  │  auto-decides:       │  │  in real time      │
+   │  Daily / Weekly /   │  │  ✓ Complete          │  │                    │
+   │  Monthly / Custom   │  │  ? Follow up         │  │  Conflict detection│
+   │                     │  │  ✗ Escalate          │  │  on commitments    │
+   └─────────┬───────────┘  └──────────┬───────────┘  └──────────┬─────────┘
+             │                         │                         │
+             └─────────────────────────┼─────────────────────────┘
+                                       ▼
+                     ┌─────────────────────────────────────────────┐
+                     │       EXECUTIVE INTELLIGENCE LAYER          │
+                     │                                             │
+                     │  Auto-generated daily / weekly / monthly    │
+                     │  operational digests delivered directly to   │
+                     │  VP's WhatsApp — no dashboards required     │
+                     └─────────────────────────────────────────────┘
 ```
 
 ### Three Patented Innovations
@@ -76,70 +126,120 @@ OmniSync AI operates as an intelligent layer over a single WhatsApp Business Clo
 | 2 | **Scheduler-LLM Execution Loop** | Cron-driven autonomous messaging with an LLM feedback loop that reads responses, evaluates compliance, and decides: complete, follow-up, or escalate |
 | 3 | **Enterprise State Synchronization Protocol** | Every client/vendor interaction is propagated to all relevant departments in real time with conflict detection |
 
+<br/>
+
+---
+
+## Demo
+
+> **Screenshots and demo GIF coming soon** — the dashboard, scheduler, and VP digest in action.
+
+<p align="center">
+  <img src="docs/diagrams/demo-placeholder.png" alt="OmniSync AI Dashboard Demo" width="800"/>
+</p>
+
+<br/>
+
 ---
 
 ## Pilot Results — Micro Turner Manufacturing Plant
 
-Deployed and validated in a live manufacturing environment over 8 weeks:
+Deployed and validated in a live manufacturing environment over **8 weeks** (2 weeks baseline + 6 weeks live):
 
-```
-┌─────────────────────────┬──────────────┬──────────────┬──────────────┐
-│ Metric                  │ Before       │ After        │ Improvement  │
-├─────────────────────────┼──────────────┼──────────────┼──────────────┤
-│ Follow-up response time │ 4.2 hours    │ 1.2 hours    │    ↓ 71%     │
-│ Missed deadlines / mo   │ 10.2         │ 1.7          │    ↓ 83%     │
-│ VP status-chasing / day │ 2.4 hours    │ 18 minutes   │    ↓ 88%     │
-│ Duplicate vendor calls  │ 4.1 / week   │ 0            │    ↓ 100%    │
-│ Scheduler reliability   │ —            │ 99.1%        │    —         │
-│ AI evaluation accuracy  │ —            │ 91.7%        │    —         │
-└─────────────────────────┴──────────────┴──────────────┴──────────────┘
-```
+<table>
+<tr>
+<th>Metric</th>
+<th>Before</th>
+<th>After</th>
+<th>Improvement</th>
+</tr>
+<tr>
+<td><strong>Follow-up Response Time</strong></td>
+<td>4.2 hours</td>
+<td>1.2 hours</td>
+<td><code>↓ 71%</code></td>
+</tr>
+<tr>
+<td><strong>Missed Deadlines / Month</strong></td>
+<td>10.2</td>
+<td>1.7</td>
+<td><code>↓ 83%</code></td>
+</tr>
+<tr>
+<td><strong>VP Status-Chasing / Day</strong></td>
+<td>2.4 hours</td>
+<td>18 minutes</td>
+<td><code>↓ 88%</code></td>
+</tr>
+<tr>
+<td><strong>Duplicate Vendor Contacts</strong></td>
+<td>4.1 / week</td>
+<td>0</td>
+<td><code>↓ 100%</code></td>
+</tr>
+<tr>
+<td><strong>Scheduler Reliability</strong></td>
+<td>—</td>
+<td>99.1%</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>AI Evaluation Accuracy</strong></td>
+<td>—</td>
+<td>91.7%</td>
+<td>—</td>
+</tr>
+</table>
+
+> *"I get my entire day's picture on WhatsApp by 6:15 PM. I haven't called anyone for a status update in 3 weeks."* — VP Operations, Micro Turner
+
+<br/>
 
 ---
 
 ## Architecture
 
 ```
-                          ┌──────────────────────────────┐
-                          │     Frontend Dashboard       │
-                          │     (Next.js + Socket.IO)    │
-                          └──────────────┬───────────────┘
-                                         │
-                          ┌──────────────┴───────────────┐
-                          │       Backend API Layer      │
-                          │       (Node.js + Express)    │
-                          │                              │
-                          │  ┌────────┐ ┌────────────┐   │
-                          │  │Webhook │ │ Scheduler  │   │
-                          │  │Handler │ │ Engine     │   │
-                          │  └───┬────┘ └─────┬──────┘   │
-                          │      │            │          │
-                          │  ┌───┴────────────┴───────┐  │
-                          │  │    Core Services       │  │
-                          │  │  ┌─────┐ ┌─────┐      │  │
-                          │  │  │Agent│ │ LLM │      │  │
-                          │  │  │ ID  │ │ Eng │      │  │
-                          │  │  └─────┘ └─────┘      │  │
-                          │  │  ┌─────┐ ┌─────┐      │  │
-                          │  │  │Sync │ │Escal│      │  │
-                          │  │  │ Svc │ │ Svc │      │  │
-                          │  │  └─────┘ └─────┘      │  │
-                          │  └────────────────────────┘  │
-                          │                              │
-                          │  ┌────────────────────────┐  │
-                          │  │   PostgreSQL + Redis   │  │
-                          │  └────────────────────────┘  │
-                          └──────┬───────────┬───────────┘
-                                 │           │
-                    ┌────────────┘           └────────────┐
-                    │                                     │
-          ┌─────────┴──────────┐            ┌─────────────┴─────┐
-          │  WhatsApp Cloud    │            │  External APIs    │
-          │  API (Meta)        │            │  OpenAI / Whisper │
-          └────────────────────┘            └───────────────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│  FRONTEND DASHBOARD                          Next.js 14 + Socket.IO    │
+│  ┌──────────┐  ┌───────────┐  ┌──────────┐  ┌───────────────────────┐ │
+│  │ Live Feed│  │ Scheduler │  │  Agent   │  │  Analytics & Digests  │ │
+│  └─────┬────┘  └─────┬─────┘  └─────┬────┘  └───────────┬───────────┘ │
+└────────┼─────────────┼───────────────┼───────────────────┼─────────────┘
+         │  REST API   │   WebSocket   │                   │
+┌────────┼─────────────┼───────────────┼───────────────────┼─────────────┐
+│  BACKEND API                                   Node.js + Express + TS  │
+│                                                                        │
+│  ┌──────────────┐  ┌──────────────┐  ┌───────────────────────────────┐ │
+│  │   Webhook    │  │   Message    │  │     Scheduler Engine          │ │
+│  │   Handler    │  │   Router     │  │     (Bull + node-cron)        │ │
+│  └──────┬───────┘  └──────┬───────┘  └───────────┬───────────────────┘ │
+│         │                 │                       │                     │
+│  ┌──────┴─────────────────┴───────────────────────┴──────────────────┐ │
+│  │                      CORE SERVICES                                │ │
+│  │                                                                   │ │
+│  │  Agent Identity ─── Context Sync (CESSP) ─── LLM Evaluator       │ │
+│  │       │                    │                       │              │ │
+│  │  HMAC-SHA256          Event-driven             GPT-4o            │ │
+│  │  role tags            propagation              structured eval   │ │
+│  │                            │                       │              │ │
+│  │  Escalation Service ──────┴───── Transcription (Whisper)         │ │
+│  └───────────────────────────────────────────────────────────────────┘ │
+│                                                                        │
+│  ┌───────────────────────┐  ┌──────────────────────────────────────┐  │
+│  │  PostgreSQL 16        │  │  Redis 7 (Bull queues + pub/sub)     │  │
+│  └───────────────────────┘  └──────────────────────────────────────┘  │
+└────────────┬────────────────────────────────────┬──────────────────────┘
+             │                                    │
+  ┌──────────┴───────────┐           ┌────────────┴────────────┐
+  │  WhatsApp Cloud API  │           │  External APIs          │
+  │  (Meta Platform)     │           │  OpenAI · Whisper · S3  │
+  └──────────────────────┘           └─────────────────────────┘
 ```
 
-> Full architecture specification: [`docs/architecture.md`](docs/architecture.md)
+> Full specification: [`docs/architecture.md`](docs/architecture.md) · API reference: [`docs/api-reference/endpoints.md`](docs/api-reference/endpoints.md)
+
+<br/>
 
 ---
 
@@ -153,70 +253,79 @@ Deployed and validated in a live manufacturing environment over 8 weeks:
 - Meta Business Account with WhatsApp Business API access
 - OpenAI API key
 
-### 1. Clone & Install
+### Option A: Docker (Recommended)
+
+```bash
+git clone https://github.com/gitswagata1/omnisync-ai.git
+cd omnisync-ai
+cp .env.example .env
+# Edit .env with your API keys
+
+docker compose up -d
+```
+
+This starts the app, PostgreSQL, and Redis with a single command. The API is available at `http://localhost:3000`.
+
+### Option B: Manual Setup
 
 ```bash
 git clone https://github.com/gitswagata1/omnisync-ai.git
 cd omnisync-ai
 npm install
-```
-
-### 2. Configure Environment
-
-```bash
 cp .env.example .env
-```
+# Edit .env with your credentials
 
-```env
-# WhatsApp Cloud API
-WHATSAPP_PHONE_NUMBER_ID=your_phone_number_id
-WHATSAPP_ACCESS_TOKEN=your_access_token
-WHATSAPP_APP_SECRET=your_app_secret
-WHATSAPP_VERIFY_TOKEN=your_webhook_verify_token
-
-# Database
-DATABASE_URL=postgresql://user:password@localhost:5432/omnisync
-
-# Redis
-REDIS_URL=redis://localhost:6379
-
-# LLM
-OPENAI_API_KEY=your_openai_key
-LLM_EVAL_TEMPERATURE=0.1
-LLM_DIGEST_TEMPERATURE=0.6
-
-# Server
-PORT=3000
-NODE_ENV=development
-JWT_SECRET=your_jwt_secret
-```
-
-### 3. Initialize Database
-
-```bash
 npm run db:migrate
-npm run db:seed        # loads demo agent + schedule data
+npm run db:seed        # loads demo agents, contacts, and schedules
+npm run dev            # starts dev server with hot reload
 ```
 
-### 4. Start Services
+### Configure Webhook
 
-```bash
-# Development (with hot reload)
-npm run dev
-
-# Production
-npm run build
-npm start
-```
-
-### 5. Configure Webhook
-
-Set your Meta webhook callback URL to:
+Point your Meta webhook callback URL to:
 ```
 https://your-domain.com/api/webhook/whatsapp
 ```
 
 Subscribe to fields: `messages`, `message_status`
+
+<br/>
+
+---
+
+## Deployment
+
+### Docker
+
+```bash
+# Build production image
+docker build -t omnisync-ai .
+
+# Run with Docker Compose (includes PostgreSQL + Redis)
+docker compose up -d
+
+# View logs
+docker compose logs -f app
+
+# Stop
+docker compose down
+```
+
+### Environment Variables
+
+See [`.env.example`](.env.example) for the full list. Key variables:
+
+| Variable | Required | Description |
+|:---------|:---------|:------------|
+| `WHATSAPP_PHONE_NUMBER_ID` | Yes | Your WhatsApp Business phone number ID |
+| `WHATSAPP_ACCESS_TOKEN` | Yes | Permanent access token from Meta |
+| `WHATSAPP_APP_SECRET` | Yes | App secret for webhook signature verification |
+| `DATABASE_URL` | Yes | PostgreSQL connection string |
+| `REDIS_URL` | Yes | Redis connection string |
+| `OPENAI_API_KEY` | Yes | OpenAI API key for LLM + Whisper |
+| `SYSTEM_SECRET` | Yes | HMAC secret for agent identity hashes |
+
+<br/>
 
 ---
 
@@ -240,44 +349,33 @@ omnisync-ai/
 │   │   ├── context-sync.ts     # CESSP implementation
 │   │   ├── escalation.ts       # Timeout detection + escalation
 │   │   └── transcription.ts    # Whisper audio → text
-│   ├── models/                 # Database models (Prisma / Drizzle)
-│   │   ├── agent.ts
-│   │   ├── contact.ts
-│   │   ├── conversation.ts
-│   │   ├── message.ts
-│   │   ├── schedule.ts
-│   │   └── escalation.ts
+│   ├── models/                 # Database models (Prisma)
 │   ├── middleware/              # Auth, validation, rate limiting
 │   ├── config/                 # Environment & app configuration
 │   └── utils/                  # Shared utilities
-├── docs/
+├── docs/                       # Technical documentation
 │   ├── architecture.md         # Full system architecture spec
-│   ├── api-reference/          # Endpoint documentation
-│   └── diagrams/               # System & flow diagrams
-├── research/
+│   └── api-reference/          # Endpoint documentation
+├── research/                   # Academic research
 │   ├── ieee_paper_draft.md     # IEEE Access paper (full draft)
-│   ├── figures/                # Paper figures & charts
 │   └── data/                   # Pilot measurement data
-├── patents/
+├── patents/                    # Intellectual property
 │   ├── patent_claims.md        # Formal utility patent claims
 │   ├── disclosures/            # Invention Disclosure Forms
-│   └── prior-art/              # Prior art search documentation
-├── pitch/
-│   ├── vc_deck_outline.md      # Slide-by-slide pitch deck
-│   ├── assets/                 # Deck visuals & mockups
+│   └── prior-art/              # Prior art analysis
+├── pitch/                      # Venture strategy
+│   ├── vc_deck_outline.md      # 12-slide investor deck
 │   └── financials/             # Unit economics & projections
-├── scripts/                    # DB migrations, seed, deploy
-├── tests/
-│   ├── unit/                   # Unit tests
-│   └── integration/            # Integration tests
+├── scripts/                    # Seed data & utilities
+├── tests/                      # Unit & integration tests
+├── Dockerfile                  # Multi-stage production build
+├── docker-compose.yml          # Full local dev stack
 ├── .env.example
-├── .gitignore
-├── LICENSE
-├── CONTRIBUTING.md
-├── SECURITY.md
 ├── package.json
 └── tsconfig.json
 ```
+
+<br/>
 
 ---
 
@@ -286,9 +384,15 @@ omnisync-ai/
 | Document | Description |
 |:---------|:------------|
 | [`docs/architecture.md`](docs/architecture.md) | Complete system architecture, data flows, database schema, and integration spec |
-| [`research/ieee_paper_draft.md`](research/ieee_paper_draft.md) | Full IEEE Access paper draft with formalized state machines and evaluation methodology |
+| [`docs/api-reference/endpoints.md`](docs/api-reference/endpoints.md) | All API endpoints with request/response schemas and auth requirements |
+| [`research/ieee_paper_draft.md`](research/ieee_paper_draft.md) | Full IEEE Access paper with formalized state machines and evaluation methodology |
 | [`patents/patent_claims.md`](patents/patent_claims.md) | Three utility patent claim sets covering core innovations |
+| [`patents/disclosures/`](patents/disclosures/) | Formal Invention Disclosure Forms (IDF-001 through IDF-003) |
+| [`patents/prior-art/analysis.md`](patents/prior-art/analysis.md) | Competitive prior art analysis across 6 platforms |
 | [`pitch/vc_deck_outline.md`](pitch/vc_deck_outline.md) | 12-slide investor pitch deck with market sizing and unit economics |
+| [`pitch/financials/`](pitch/financials/) | Detailed unit economics and 3-year financial projections |
+
+<br/>
 
 ---
 
@@ -296,11 +400,11 @@ omnisync-ai/
 
 ### Patents (Filed — Indian Patent Office via VIT IPR Cell)
 
-| # | Title | Status |
-|:-:|:------|:-------|
-| 1 | Single-Number Multi-Agent Context Multiplexing System | Provisional Filed |
-| 2 | Autonomous Bi-Directional Scheduler-LLM Execution Loop | Provisional Filed |
-| 3 | Conversational Enterprise State Synchronization Protocol | Provisional Filed |
+| # | Title | Disclosure | Status |
+|:-:|:------|:-----------|:-------|
+| 1 | Single-Number Multi-Agent Context Multiplexing System | [IDF-001](patents/disclosures/IDF-001-multiplexing.md) | Provisional Filed |
+| 2 | Autonomous Bi-Directional Scheduler-LLM Execution Loop | [IDF-002](patents/disclosures/IDF-002-scheduler-llm.md) | Provisional Filed |
+| 3 | Conversational Enterprise State Synchronization Protocol | [IDF-003](patents/disclosures/IDF-003-state-sync.md) | Provisional Filed |
 
 ### Academic Publication
 
@@ -310,14 +414,17 @@ omnisync-ai/
 
 > See [`research/ieee_paper_draft.md`](research/ieee_paper_draft.md) for the complete manuscript.
 
+<br/>
+
 ---
 
 ## Roadmap
 
 - [x] MVP architecture design
-- [x] Micro Turner pilot deployment
+- [x] Micro Turner pilot deployment (8 weeks, 5 departments)
 - [x] Patent provisional specifications filed (×3)
 - [x] IEEE Access paper submitted
+- [x] Docker deployment support
 - [ ] Multi-tenant SaaS infrastructure
 - [ ] Self-serve onboarding flow
 - [ ] Fine-tuned LLM for manufacturing domain
@@ -326,30 +433,33 @@ omnisync-ai/
 - [ ] On-premises deployment option
 - [ ] Mobile dashboard app
 
+<br/>
+
 ---
 
 ## Tech Stack
 
 | Layer | Technology |
 |:------|:-----------|
-| Frontend | Next.js 14, React, Tailwind CSS, shadcn/ui, Socket.IO |
-| Backend | Node.js, Express, TypeScript |
-| Scheduler | Bull (Redis-backed), node-cron |
-| Database | PostgreSQL 16, Prisma ORM |
-| Cache & Queue | Redis 7 |
-| LLM | OpenAI GPT-4o, Whisper API |
-| Messaging | WhatsApp Business Cloud API (v21.0) |
-| Storage | S3 / Cloudflare R2 |
-| Deployment | Docker, Railway / AWS |
+| **Frontend** | Next.js 14, React, Tailwind CSS, shadcn/ui, Socket.IO |
+| **Backend** | Node.js, Express, TypeScript |
+| **Scheduler** | Bull (Redis-backed), node-cron |
+| **Database** | PostgreSQL 16, Prisma ORM |
+| **Cache & Queue** | Redis 7 |
+| **LLM** | OpenAI GPT-4o, Whisper API |
+| **Messaging** | WhatsApp Business Cloud API (v21.0) |
+| **Storage** | S3 / Cloudflare R2 |
+| **Deployment** | Docker, Docker Compose, Railway / AWS |
+
+<br/>
 
 ---
 
 ## Contributing
 
-We welcome contributions. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for guidelines.
+We welcome contributions. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for full guidelines.
 
 ```bash
-# Fork the repo, then:
 git checkout -b feature/your-feature
 npm test
 git commit -m "feat: add your feature"
@@ -364,6 +474,8 @@ git push origin feature/your-feature
 - Load testing at scale (1000+ concurrent conversations)
 - ERP/CRM integration connectors
 
+<br/>
+
 ---
 
 ## License
@@ -371,6 +483,8 @@ git push origin feature/your-feature
 This project is licensed under the **Apache License 2.0** — see [`LICENSE`](LICENSE) for details.
 
 The patent-pending innovations described in [`patents/`](patents/) are protected under Indian Patent Office filings. The Apache 2.0 license includes a patent grant for use of the software as distributed.
+
+<br/>
 
 ---
 
@@ -389,9 +503,25 @@ If you use OmniSync AI in academic work, please cite:
 }
 ```
 
+<br/>
+
 ---
 
 <div align="center">
+
+### Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=gitswagata1/omnisync-ai&type=Date)](https://star-history.com/#gitswagata1/omnisync-ai&Date)
+
+<br/>
+
+### Contributors
+
+<a href="https://github.com/gitswagata1/omnisync-ai/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=gitswagata1/omnisync-ai" />
+</a>
+
+<br/><br/>
 
 **Built with conviction at [VIT](https://vit.ac.in) · Validated at Micro Turner · Patented · Peer-Reviewed**
 

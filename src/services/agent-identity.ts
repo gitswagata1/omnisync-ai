@@ -1,6 +1,5 @@
 import crypto from 'crypto';
-
-const SYSTEM_SECRET = process.env.SYSTEM_SECRET || '';
+import { config } from '../config/index.js';
 
 export function generateAuthHash(
   agentId: string,
@@ -8,7 +7,7 @@ export function generateAuthHash(
   department: string
 ): string {
   return crypto
-    .createHmac('sha256', SYSTEM_SECRET)
+    .createHmac('sha256', config.auth.systemSecret)
     .update(`${agentId}${role}${department}`)
     .digest('hex');
 }
@@ -20,6 +19,7 @@ export function verifyAuthHash(
   hash: string
 ): boolean {
   const expected = generateAuthHash(agentId, role, department);
+  if (expected.length !== hash.length) return false;
   return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(hash));
 }
 

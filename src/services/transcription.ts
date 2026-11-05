@@ -1,15 +1,22 @@
+import OpenAI from 'openai';
+import { downloadMedia } from '../lib/whatsapp.js';
+import { config } from '../config/index.js';
 import { logger } from '../utils/logger.js';
 
-export async function transcribeAudio(_mediaUrl: string): Promise<string> {
-  logger.info('Transcribing audio via Whisper');
+const openai = new OpenAI({ apiKey: config.llm.apiKey });
 
-  // TODO: Implementation
-  //
-  // 1. Download audio from WhatsApp Graph API using media URL
-  // 2. Store temporarily in /tmp or memory buffer
-  // 3. Send to OpenAI Whisper API (model: whisper-1)
-  // 4. Return transcript text
-  // 5. Clean up temporary file
+export async function transcribeAudio(mediaId: string): Promise<string> {
+  logger.info(`Transcribing audio media ${mediaId}`);
 
-  return '';
+  const buffer = await downloadMedia(mediaId);
+
+  const file = new File([buffer], 'audio.ogg', { type: 'audio/ogg' });
+
+  const transcription = await openai.audio.transcriptions.create({
+    model: 'whisper-1',
+    file,
+  });
+
+  logger.info(`Transcription complete: ${transcription.text.length} chars`);
+  return transcription.text;
 }

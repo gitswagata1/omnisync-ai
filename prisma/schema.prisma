@@ -1,0 +1,156 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Agent {
+  id            String   @id @default(uuid()) @db.Uuid
+  company       String   @default("Micro Turner") @db.VarChar(100)
+  userName      String   @db.VarChar(100)
+  role          String   @db.VarChar(100)
+  department    String   @db.VarChar(100)
+  personalPhone String?  @db.VarChar(20)
+  roleTag       String   @db.VarChar(255)
+  permissions   Json     @default("[]")
+  authHash      String   @db.VarChar(64)
+  status        String   @default("active") @db.VarChar(20)
+  createdAt     DateTime @default(now())
+
+  sentMessages     Message[]    @relation("SenderAgent")
+  createdSchedules Schedule[]   @relation("ScheduleCreator")
+  assignedSchedules Schedule[]  @relation("ScheduleAgent")
+
+  @@map("agents")
+}
+
+model Contact {
+  id           String   @id @default(uuid()) @db.Uuid
+  phone        String   @unique @db.VarChar(20)
+  name         String?  @db.VarChar(200)
+  organization String?  @db.VarChar(200)
+  contactType  String?  @db.VarChar(50)
+  departments  String[]
+  assignedAgentIds String[] @db.Uuid
+  contextCard  Json     @default("{}")
+  createdAt    DateTime @default(now())
+
+  conversations Conversation[]
+
+  @@map("contacts")
+}
+
+model Conversation {
+  id            String    @id @default(uuid()) @db.Uuid
+  contactId     String    @db.Uuid
+  department    String?   @db.VarChar(100)
+  status        String    @default("active") @db.VarChar(50)
+  lastMessageAt DateTime?
+  messageCount  Int       @default(0)
+  createdAt     DateTime  @default(now())
+
+  contact  Contact   @relation(fields: [contactId], references: [id])
+  messages Message[]
+
+  @@map("conversations")
+}
+
+model Message {
+  id              String   @id @default(uuid()) @db.Uuid
+  conversationId  String   @db.Uuid
+  waMessageId     String?  @db.VarChar(100)
+  direction       String   @db.VarChar(10)
+  senderAgentId   String?  @db.Uuid
+  senderPhone     String?  @db.VarChar(20)
+  messageType     String?  @db.VarChar(20)
+  body            String?
+  mediaUrl        String?  @db.VarChar(500)
+  transcript      String?
+  llmAnalysis     Json?
+  deliveryStatus  String?  @db.VarChar(20)
+  createdAt       DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  senderAgent  Agent?       @relation("SenderAgent", fields: [senderAgentId], references: [id])
+
+  @@index([conversationId])
+  @@index([createdAt])
+  @@index([waMessageId])
+  @@map("messages")
+}
+
+model Schedule {
+  id               String    @id @default(uuid()) @db.Uuid
+  name             String    @db.VarChar(255)
+  scheduleType     String?   @db.VarChar(50)
+  cronExpression   String    @db.VarChar(100)
+  recipientPhone   String    @db.VarChar(20)
+  recipientName    String?   @db.VarChar(200)
+  agentId          String?   @db.Uuid
+  messageTemplate  String?   @db.VarChar(100)
+  templateVars     Json      @default("{}")
+  expectedCriteria String?
+  status           String    @default("enabled") @db.VarChar(20)
+  retryPolicy      Json      @default("{\"maxRetries\": 3, \"backoffSeconds\": 300}")
+  escalationConfig Json?
+  lastRunAt        DateTime?
+  nextRunAt        DateTime?
+  runCount         Int       @default(0)
+  errorCount       Int       @default(0)
+  createdBy        String?   @db.Uuid
+  createdAt        DateTime  @default(now())
+
+  agent   Agent? @relation("ScheduleAgent", fields: [agentId], references: [id])
+  creator Agent? @relation("ScheduleCreator", fields: [createdBy], references: [id])
+  logs    ScheduleLog[]
+
+  @@index([status])
+  @@index([nextRunAt])
+  @@map("schedules")
+}
+
+model ScheduleLog {
+  id               String    @id @default(uuid()) @db.Uuid
+  scheduleId       String    @db.Uuid
+  executedAt       DateTime  @default(now())
+  status           String    @db.VarChar(20)
+  waMessageId      String?   @db.VarChar(100)
+  errorMessage     String?
+  responseReceived Boolean   @default(false)
+  responseAt       DateTime?
+  llmEvaluation    Json?
+
+  schedule Schedule @relation(fields: [scheduleId], references: [id])
+
+  @@index([scheduleId])
+  @@map("schedule_logs")
+}
+
+model Escalation {
+  id             String    @id @default(uuid()) @db.Uuid
+  triggerType    String    @db.VarChar(50)
+  sourceId       String?   @db.Uuid
+  escalatedTo    String    @db.VarChar(20)
+  escalationMsg  String?
+  status         String    @default("sent") @db.VarChar(20)
+  createdAt      DateTime  @default(now())
+  resolvedAt     DateTime?
+
+  @@map("escalations")
+}
+
+model AuditLog {
+  id           String   @id @default(uuid()) @db.Uuid
+  actorAgentId String?  @db.Uuid
+  action       String   @db.VarChar(100)
+  targetType   String?  @db.VarChar(50)
+  targetId     String?  @db.Uuid
+  metadata     Json?
+  createdAt    DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("audit_log")
+}
