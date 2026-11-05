@@ -17,6 +17,8 @@ model Agent {
   roleTag       String   @db.VarChar(255)
   permissions   Json     @default("[]")
   authHash      String   @db.VarChar(64)
+  email         String?  @unique @db.VarChar(255)
+  passwordHash  String?  @db.VarChar(255)
   status        String   @default("active") @db.VarChar(20)
   createdAt     DateTime @default(now())
 
