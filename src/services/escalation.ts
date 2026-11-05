@@ -1,6 +1,7 @@
 import { prisma } from '../lib/prisma.js';
 import { sendTemplateMessage } from '../lib/whatsapp.js';
 import { propagateSyncEvent } from './context-sync.js';
+import { SchedulerState } from './scheduler-fsm.js';
 import { logger } from '../utils/logger.js';
 import type { Server as SocketServer } from 'socket.io';
 
@@ -36,7 +37,7 @@ export async function triggerEscalation(
     logger.warn(`No escalation config for schedule ${scheduleId}, pausing instead`);
     await prisma.schedule.update({
       where: { id: scheduleId },
-      data: { status: 'error' },
+      data: { status: SchedulerState.ERROR.toLowerCase() },
     });
     return;
   }
@@ -74,7 +75,7 @@ export async function triggerEscalation(
 
   await prisma.schedule.update({
     where: { id: scheduleId },
-    data: { status: 'escalated' },
+    data: { status: SchedulerState.ESCALATED.toLowerCase() },
   });
 
   await prisma.scheduleLog.create({

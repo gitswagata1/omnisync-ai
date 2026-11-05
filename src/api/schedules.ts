@@ -163,7 +163,7 @@ schedulesRouter.patch(
         },
       });
 
-      res.json({ status: 'paused' });
+      res.json({ status: pausedState.toLowerCase() });
     } catch (err) {
       res.status(500).json({ error: 'Failed to pause schedule' });
     }
@@ -184,14 +184,21 @@ schedulesRouter.patch(
         return;
       }
 
-      if (!['paused', 'error'].includes(schedule.status)) {
-        res.status(400).json({ error: `Cannot resume from ${schedule.status} state` });
-        return;
+      const resumeCurrentState = schedule.status.toUpperCase() as SchedulerState;
+      let resumedState: SchedulerState;
+      try {
+        resumedState = transition(resumeCurrentState, SchedulerEvent.MANUAL_RESUME);
+      } catch (err) {
+        if (err instanceof InvalidTransitionError) {
+          res.status(400).json({ error: `Cannot resume from ${schedule.status} state` });
+          return;
+        }
+        throw err;
       }
 
       await prisma.schedule.update({
         where: { id: schedule.id },
-        data: { status: 'enabled', errorCount: 0 },
+        data: { status: resumedState.toLowerCase(), errorCount: 0 },
       });
 
       await addScheduleJob(schedule.id, schedule.cronExpression);
@@ -205,7 +212,7 @@ schedulesRouter.patch(
         },
       });
 
-      res.json({ status: 'enabled' });
+      res.json({ status: resumedState.toLowerCase() });
     } catch (err) {
       res.status(500).json({ error: 'Failed to resume schedule' });
     }
@@ -226,10 +233,22 @@ schedulesRouter.delete(
         return;
       }
 
+      const deleteCurrentState = schedule.status.toUpperCase() as SchedulerState;
+      let deletedState: SchedulerState;
+      try {
+        deletedState = transition(deleteCurrentState, SchedulerEvent.MANUAL_DELETE);
+      } catch (err) {
+        if (err instanceof InvalidTransitionError) {
+          res.status(400).json({ error: `Cannot delete from ${schedule.status} state` });
+          return;
+        }
+        throw err;
+      }
+
       await removeScheduleJob(schedule.id);
       await prisma.schedule.update({
         where: { id: schedule.id },
-        data: { status: 'deleted' },
+        data: { status: deletedState.toLowerCase() },
       });
 
       await prisma.auditLog.create({
@@ -241,7 +260,7 @@ schedulesRouter.delete(
         },
       });
 
-      res.json({ status: 'deleted' });
+      res.json({ status: deletedState.toLowerCase() });
     } catch (err) {
       res.status(500).json({ error: 'Failed to delete schedule' });
     }
