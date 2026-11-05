@@ -10,7 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "lint": "eslint src/ --ext .ts,.tsx",
+    "lint": "eslint src/ tests/",
     "typecheck": "tsc --noEmit",
     "db:migrate": "prisma migrate deploy",
     "db:generate": "prisma generate",

@@ -39,6 +39,25 @@ const statCards = [
   { key: 'schedulesRunToday', label: 'Schedules Run Today', icon: Play, color: 'text-cyan-400' },
 ] as const;
 
+interface DashboardApiResponse {
+  messages?: { total?: number };
+  schedules?: Record<string, number>;
+  escalations?: { pending?: number };
+  performance?: { scheduledExecutionsToday?: number; avgResponseTimeMinutes?: number | null };
+}
+
+function toDashboardMetrics(data: DashboardApiResponse): DashboardMetrics {
+  return {
+    messagesToday: data.messages?.total ?? 0,
+    activeSchedules: data.schedules?.enabled ?? 0,
+    pendingEscalations: data.escalations?.pending ?? 0,
+    avgResponseTime: (data.performance?.avgResponseTimeMinutes ?? 0) / 60,
+    // Not provided by the API yet.
+    messagesThisWeek: 0,
+    schedulesRunToday: data.performance?.scheduledExecutionsToday ?? 0,
+  };
+}
+
 export default function DashboardPage() {
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [activity, setActivity] = useState<ActivityEvent[]>([]);
@@ -46,9 +65,11 @@ export default function DashboardPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    // The API returns a nested shape (messages / schedules / escalations /
+    // performance / totals); map it onto the flat DashboardMetrics this page uses.
     api
-      .get<{ metrics: DashboardMetrics }>('/api/analytics/dashboard')
-      .then((data) => setMetrics(data.metrics))
+      .get<DashboardApiResponse>('/api/analytics/dashboard')
+      .then((data) => setMetrics(toDashboardMetrics(data)))
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, []);

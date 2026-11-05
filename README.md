@@ -80,59 +80,239 @@ Modern industrial enterprises hemorrhage operational efficiency through three sy
 
 ---
 
-## The Solution
+## How It Works — Three Core Flows
 
-OmniSync AI operates as an intelligent layer over a single WhatsApp Business Cloud API endpoint:
-
-```
-                     ┌─────────────────────────────────────────────┐
-                     │           ONE WHATSAPP NUMBER               │
-                     │     Multiple Agents · Identity Tags         │
-                     │    (Micro Turner | Swagata | Purchase)      │
-                     └──────────────────┬──────────────────────────┘
-                                        │
-              ┌─────────────────────────┼─────────────────────────┐
-              │                         │                         │
-              ▼                         ▼                         ▼
-   ┌────────────────────┐  ┌────────────────────┐  ┌────────────────────┐
-   │   AUTONOMOUS        │  │   AI RESPONSE       │  │   CROSS-DEPARTMENT │
-   │   SCHEDULER         │  │   EVALUATOR          │  │   CONTEXT SYNC     │
-   │                     │  │                      │  │                    │
-   │  Cron-driven        │  │  LLM scores          │  │  Every interaction │
-   │  reminders &        │  │  completeness &      │  │  visible to all    │
-   │  escalation chains  │  │  compliance, then    │  │  relevant agents   │
-   │                     │  │  auto-decides:       │  │  in real time      │
-   │  Daily / Weekly /   │  │  ✓ Complete          │  │                    │
-   │  Monthly / Custom   │  │  ? Follow up         │  │  Conflict detection│
-   │                     │  │  ✗ Escalate          │  │  on commitments    │
-   └─────────┬───────────┘  └──────────┬───────────┘  └──────────┬─────────┘
-             │                         │                         │
-             └─────────────────────────┼─────────────────────────┘
-                                       ▼
-                     ┌─────────────────────────────────────────────┐
-                     │       EXECUTIVE INTELLIGENCE LAYER          │
-                     │                                             │
-                     │  Auto-generated daily / weekly / monthly    │
-                     │  operational digests delivered directly to   │
-                     │  VP's WhatsApp — no dashboards required     │
-                     └─────────────────────────────────────────────┘
-```
-
-### Three Patented Innovations
-
-| # | Innovation | What It Does |
-|:-:|:-----------|:-------------|
-| 1 | **Multi-Agent Context Multiplexing** | Multiple employees operate through one WhatsApp number with cryptographically-secured identity tags (`Company \| User \| Role`) and RBAC isolation |
-| 2 | **Scheduler-LLM Execution Loop** | Cron-driven autonomous messaging with an LLM feedback loop that reads responses, evaluates compliance, and decides: complete, follow-up, or escalate |
-| 3 | **Enterprise State Synchronization Protocol** | Every client/vendor interaction is propagated to all relevant departments in real time with conflict detection |
-
-<br/>
+OmniSync AI runs three autonomous flows on a single WhatsApp Business number. Each flow has a clear **Input → Process → Output** pipeline.
 
 ---
 
-## Demo
+### Flow 1: Inbound Message Processing
 
-> **Dashboard is live** — real-time message feeds, schedule management, agent RBAC, contact context cards, executive analytics, and escalation tracking. Run `cd dashboard && npm run dev` to launch.
+*A client or vendor sends a WhatsApp message to the company number.*
+
+```
+ ╔═══════════════════════════════════════════════════════════════════════╗
+ ║  INPUT                                                               ║
+ ║                                                                      ║
+ ║  Mercedes sends WhatsApp message: "Reschedule PO #4521 to Week 48"  ║
+ ║  ───────────────────────────────────────────────────────────────────  ║
+ ║  Source:  WhatsApp Cloud API webhook (HMAC-SHA256 verified)          ║
+ ║  Types:   text, voice note, image, document                         ║
+ ╚════════════════════════════════╤══════════════════════════════════════╝
+                                  │
+                                  ▼
+ ┌──────────────────────────────────────────────────────────────────────┐
+ │  PROCESS (automated, no human intervention)                         │
+ │                                                                     │
+ │  1. VERIFY     HMAC-SHA256 signature check on webhook payload       │
+ │  2. IDENTIFY   Contact lookup → Mercedes → [Purchase, Sales, QC]   │
+ │  3. TRANSCRIBE If voice note → Whisper API → text transcript        │
+ │  4. ANALYZE    GPT-4o extracts:                                     │
+ │                  • Intent: "delivery_reschedule"                     │
+ │                  • Urgency: 3/5                                      │
+ │                  • Entities: {PO: "4521", date: "Week 48"}          │
+ │                  • Suggested replies: ["Acknowledged...", "Let me..."]│
+ │  5. STORE      Message + analysis → PostgreSQL (messages table)     │
+ │  6. SYNC       Broadcast to all bound departments via CESSP         │
+ └──────────────────────────────────────────────────────────────────────┘
+                                  │
+                                  ▼
+ ╔═══════════════════════════════════════════════════════════════════════╗
+ ║  OUTPUT (3 simultaneous channels)                                    ║
+ ║                                                                      ║
+ ║  → DASHBOARD    Real-time WebSocket push to all Purchase + Sales    ║
+ ║                 agents. Message appears in live feed with AI badges. ║
+ ║                                                                      ║
+ ║  → WHATSAPP     Each agent's personal WhatsApp receives:            ║
+ ║                 "[Mercedes] Reschedule PO #4521 to Week 48"         ║
+ ║                 + urgency flag + suggested replies                   ║
+ ║                                                                      ║
+ ║  → CONTEXT CARD Contact's unified timeline updated with:            ║
+ ║                 entities extracted, commitment flags raised,         ║
+ ║                 conflict detection against existing commitments      ║
+ ╚═══════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+### Flow 2: Autonomous Scheduler + LLM Evaluation Loop
+
+*The system proactively sends a scheduled message, waits for a response, and decides what to do next — without human intervention.*
+
+```
+ ╔═══════════════════════════════════════════════════════════════════════╗
+ ║  INPUT                                                               ║
+ ║                                                                      ║
+ ║  Schedule config (created once by manager):                          ║
+ ║    Name:     "Daily Maintenance Check - CNC Bay 3"                  ║
+ ║    Cron:     0 8 * * 1-6  (Mon-Sat 8:00 AM)                        ║
+ ║    To:       Rajesh (+91-98765-43210)                               ║
+ ║    Message:  "Submit today's maintenance status for Bay 1-5"        ║
+ ║    Expect:   "Complete status for all 5 bays"                       ║
+ ║    Timeout:  2 hours                                                 ║
+ ║    Escalate: VP Operations (+91-98765-00001)                        ║
+ ╚════════════════════════════════╤══════════════════════════════════════╝
+                                  │
+                                  ▼
+ ┌──────────────────────────────────────────────────────────────────────┐
+ │  PROCESS (fully autonomous closed loop)                             │
+ │                                                                     │
+ │  8:00 AM  ► Cron fires → Bull queue dispatches message              │
+ │             → WhatsApp API sends to Rajesh                          │
+ │             → State: ENABLED → RUNNING → WAITING                    │
+ │             → 2-hour countdown timer starts                         │
+ │                                                                     │
+ │  SCENARIO A: Rajesh replies                                         │
+ │  ─────────────────────────────                                      │
+ │  9:15 AM  ► Rajesh replies: "Bay 1-3 clear. Bay 4 bearing          │
+ │             replacement started, ETA tomorrow."                     │
+ │             → GPT-4o evaluates against expected criteria:           │
+ │               completeness: 0.85  compliance: 0.90                  │
+ │               decision: ACCEPT ✓                                    │
+ │             → State: WAITING → SUCCESS → ENABLED (ready for next day)│
+ │                                                                     │
+ │  SCENARIO B: Rajesh replies vaguely                                 │
+ │  ──────────────────────────────                                     │
+ │  9:15 AM  ► Rajesh replies: "will check"                           │
+ │             → GPT-4o evaluates:                                     │
+ │               completeness: 0.20  compliance: 0.50                  │
+ │               decision: CLARIFY ?                                   │
+ │             → Auto-sends: "What's the specific status of each bay?" │
+ │             → State: stays WAITING, timer continues                 │
+ │                                                                     │
+ │  SCENARIO C: No reply                                               │
+ │  ────────────────────                                               │
+ │  10:00 AM ► 2-hour timeout expires                                  │
+ │             → State: WAITING → ESCALATED                            │
+ │             → Escalation triggered automatically                    │
+ └──────────────────────────────────────────────────────────────────────┘
+                                  │
+                                  ▼
+ ╔═══════════════════════════════════════════════════════════════════════╗
+ ║  OUTPUT (depends on scenario)                                        ║
+ ║                                                                      ║
+ ║  ACCEPT:    ✓ Task marked complete. Context card updated.           ║
+ ║             ✓ Data feeds into 6 PM daily digest.                    ║
+ ║                                                                      ║
+ ║  CLARIFY:   ? Follow-up question auto-sent to Rajesh on WhatsApp.  ║
+ ║             ? Dashboard shows "awaiting clarification" status.      ║
+ ║                                                                      ║
+ ║  ESCALATE:  ✗ VP receives WhatsApp: "⚠ Rajesh has not responded    ║
+ ║               to maintenance check (sent 8:00 AM)."                 ║
+ ║             ✗ Dashboard flags as OVERDUE. Escalation logged.        ║
+ ║             ✗ Audit trail records the full chain.                   ║
+ ╚═══════════════════════════════════════════════════════════════════════╝
+```
+
+**State Machine (9 states, 12 events):**
+```
+ENABLED ──cron──► RUNNING ──sent──► WAITING ──accept──► SUCCESS ──► ENABLED
+                     │                 ├── clarify ──► WAITING (follow-up)
+                     │                 ├── reject ───► FAILED ──► ESCALATED
+                     │                 └── timeout ──► ESCALATED
+                     └── failed ──► FAILED ──retry──► RUNNING
+                                          └─exhaust─► ERROR
+                              PAUSED ◄──pause── (any active state)
+                              DELETED ◄──delete── (any state)
+```
+
+---
+
+### Flow 3: Executive Intelligence Digest
+
+*At scheduled intervals, the system aggregates all operational data and generates a natural-language summary delivered to the VP's WhatsApp.*
+
+```
+ ╔═══════════════════════════════════════════════════════════════════════╗
+ ║  INPUT (automatically collected throughout the day)                  ║
+ ║                                                                      ║
+ ║  From messages table:    All inbound + outbound messages today       ║
+ ║  From schedule_logs:     All scheduled executions and their results  ║
+ ║  From escalations table: All escalations triggered today             ║
+ ║  From contacts:          Context cards with extracted entities       ║
+ ║                                                                      ║
+ ║  Trigger: Cron at 6:00 PM (daily), Monday 9 AM (weekly), 1st (mo.) ║
+ ╚════════════════════════════════╤══════════════════════════════════════╝
+                                  │
+                                  ▼
+ ┌──────────────────────────────────────────────────────────────────────┐
+ │  PROCESS                                                            │
+ │                                                                     │
+ │  1. AGGREGATE   Query all data within time range from PostgreSQL    │
+ │  2. COMPUTE     Metrics:                                            │
+ │                   • Messages: 47 total (32 inbound, 15 outbound)   │
+ │                   • Schedules: 23 ran, 21 succeeded, 2 escalated   │
+ │                   • Escalations: 2 active, 1 resolved              │
+ │                   • Avg response time: 1.2 hours                   │
+ │  3. FILTER      Key events: messages with urgency ≥ 3              │
+ │  4. SYNTHESIZE  GPT-4o generates WhatsApp-readable summary:        │
+ │                   • Items needing attention (top)                   │
+ │                   • Department-by-department breakdown              │
+ │                   • Completed items                                 │
+ │                   • Trends vs. previous period                     │
+ └──────────────────────────────────────────────────────────────────────┘
+                                  │
+                                  ▼
+ ╔═══════════════════════════════════════════════════════════════════════╗
+ ║  OUTPUT                                                              ║
+ ║                                                                      ║
+ ║  → VP's WHATSAPP (6:15 PM):                                        ║
+ ║    ┌──────────────────────────────────────────┐                     ║
+ ║    │ *Daily Summary — Nov 5, 2026*            │                     ║
+ ║    │                                          │                     ║
+ ║    │ ⚠ *Action Required (2)*                  │                     ║
+ ║    │ • QC Batch #4519 — no response (esc.)   │                     ║
+ ║    │ • Mercedes PO #4521 — rescheduled Wk 48 │                     ║
+ ║    │                                          │                     ║
+ ║    │ ✅ *Maintenance*                          │                     ║
+ ║    │ • CNC Bay 3: Bearing done (Rajesh)      │                     ║
+ ║    │ • Lathe Bay 1: Part ETA Nov 7           │                     ║
+ ║    │                                          │                     ║
+ ║    │ ✅ *Purchase*                             │                     ║
+ ║    │ • Bosch PO #4522: NET30 confirmed (Amit)│                     ║
+ ║    │                                          │                     ║
+ ║    │ 📊 21/23 schedules completed (91%)       │                     ║
+ ║    │ ⏱ Avg response: 1.2 hrs (↓ from 1.4)   │                     ║
+ ║    └──────────────────────────────────────────┘                     ║
+ ║                                                                      ║
+ ║  → DASHBOARD    Digest archived in analytics panel                  ║
+ ║  → DATABASE     Stored for trend analysis                           ║
+ ╚═══════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+### Cross-Department Context Sync (runs inside every flow)
+
+*When any agent interacts with a shared contact, all other departments see it instantly.*
+
+```
+ INPUT:   Swagata (Purchase) messages Mercedes: "Confirming Week 48"
+            │
+ PROCESS:  1. Message sent via WhatsApp API with role tag
+           2. CESSP fires E_OUTBOUND event
+           3. System checks: Mercedes is bound to [Purchase, Sales, QC]
+           4. Exclude source (Purchase) → targets: [Sales, QC]
+           5. Check for conflicts: Sales had "Week 47" commitment
+              → CONFLICT DETECTED → priority escalated to CRITICAL
+            │
+ OUTPUT:   → Amit (Sales): Dashboard warning + WhatsApp alert:
+             "⚠ Swagata committed Mercedes to Week 48.
+              Conflicts with your Week 47 commitment."
+           → QC team: Dashboard notification (normal priority)
+           → Mercedes contact card: unified timeline updated,
+             conflict flag raised between Purchase and Sales
+```
+
+---
+
+### Three Patented Innovations
+
+| # | Innovation | Input | Process | Output |
+|:-:|:-----------|:------|:--------|:-------|
+| 1 | **Multi-Agent Multiplexing** | One WhatsApp Business number, N employees | HMAC-SHA256 identity binding, RBAC permission matrix, collision detection | Each message carries verified `[Company \| User \| Dept]` tag; agents isolated by role |
+| 2 | **Scheduler-LLM Loop** | Cron schedule + expected criteria | Autonomous send → wait → GPT-4o evaluate → decide | ACCEPT (done), CLARIFY (auto-follow-up), REJECT (auto-escalate) |
+| 3 | **CESSP (State Sync)** | Any agent↔contact interaction | Event propagation to all bound departments, commitment conflict check | Real-time dashboard + WhatsApp alerts to relevant agents; conflict flags |
 
 <br/>
 
@@ -262,6 +442,12 @@ docker compose up -d
 
 This starts the backend API, dashboard, PostgreSQL, and Redis. The API is at `http://localhost:3000`, the dashboard at `http://localhost:3001`.
 
+To run only PostgreSQL and Redis for Option B (the API and dashboard then run from source):
+
+```bash
+docker compose up -d postgres redis
+```
+
 ### Option B: Manual Setup
 
 ```bash
@@ -269,18 +455,28 @@ git clone https://github.com/gitswagata1/omnisync-ai.git
 cd omnisync-ai
 npm install
 cp .env.example .env
-# Edit .env with your credentials
+# Edit .env with your credentials. Generate JWT_SECRET and SYSTEM_SECRET
+# with a random value of at least 32 characters.
 
-npm run db:migrate
-npm run db:seed        # loads demo agents, contacts, and schedules
-npm run dev            # starts backend with hot reload
+docker compose up -d postgres redis   # or run your own Postgres 16 and Redis 7
+
+npx prisma db push                    # the repo has no migration files yet
+npm run db:seed                       # loads demo agents, contacts, and schedules
+npx tsx --env-file=.env src/index.ts  # starts the API on http://localhost:3000
 
 # In a second terminal:
 cd dashboard
 npm install
 cp .env.example .env
-npm run dev            # starts dashboard at http://localhost:3000
+npm run dev -- -p 3001                # dashboard at http://localhost:3001
 ```
+
+Notes:
+- `npm run dev` runs `tsx watch src/index.ts`, which does not load `.env` by itself. The backend reads `JWT_SECRET` from `process.env`, so without `--env-file=.env` login fails with a 500 error. Use the command above or add `dotenv`.
+- The dashboard's default dev port is 3000, which is also the API port. Pass `-p 3001` when both run on one machine.
+- `npm run db:migrate` (`prisma migrate deploy`) requires migration files, which the repo does not include yet. Use `npx prisma db push` for a local database.
+- Demo logins use the seeded agent IDs printed by `npm run db:seed` (for example `550e8400-e29b-41d4-a716-446655440001`).
+- The dashboard supports light and dark themes. Use the sun/moon button in the header; the choice is saved in the browser.
 
 ### Configure Webhook
 

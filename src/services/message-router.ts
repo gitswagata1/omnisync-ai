@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
 import { sendTextMessage, markAsRead } from '../lib/whatsapp.js';
 import { buildRoleTag, verifyAuthHash } from './agent-identity.js';
@@ -69,7 +70,7 @@ export async function demultiplexInbound(
         textContent,
         contact.name ?? senderPhone,
         contact.organization ?? 'Unknown'
-      ) as unknown as Record<string, unknown>;
+      );
     } catch (err) {
       logger.error(`LLM analysis failed: ${err}`);
     }
@@ -84,7 +85,7 @@ export async function demultiplexInbound(
       messageType,
       body: messageBody,
       transcript,
-      llmAnalysis,
+      llmAnalysis: llmAnalysis ? (llmAnalysis as Prisma.InputJsonValue) : Prisma.JsonNull,
       deliveryStatus: 'delivered',
     },
   });
@@ -112,7 +113,7 @@ export async function demultiplexInbound(
       contactOrg: contact.organization,
       body: textContent,
       messageType,
-      llmAnalysis,
+      llmAnalysis: llmAnalysis ? (llmAnalysis as Prisma.InputJsonValue) : Prisma.JsonNull,
       timestamp: message.createdAt.toISOString(),
     };
 
@@ -137,8 +138,8 @@ export async function demultiplexInbound(
       messageId: message.id,
       body: textContent?.slice(0, 200),
       messageType,
-      intent: (llmAnalysis?.intent as string) ?? null,
-      urgency: (llmAnalysis?.urgency as number) ?? null,
+      intent: (llmAnalysis?.intent) ?? null,
+      urgency: (llmAnalysis?.urgency) ?? null,
     },
     priority:
       (llmAnalysis?.urgency as number) >= 4 ? 'CRITICAL' : 'IMMEDIATE',

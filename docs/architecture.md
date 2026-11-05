@@ -80,16 +80,36 @@ VIEWER           → Read-only dashboard access (for VP digests)
 
 Receives all incoming WhatsApp messages from Meta's webhook infrastructure.
 
-**Pipeline:**
 ```
-Webhook POST → Signature Verification → Payload Parse → Media Download
-    → Contact Lookup → Department Routing → DB Store → LLM Analysis
-    → Agent Notification (WebSocket + WhatsApp forward) → Escalation Check
+INPUT ─────────────────────────────────────────────────────────────────
+  HTTP POST from Meta webhook infrastructure containing:
+  • X-Hub-Signature-256 header (HMAC-SHA256 of payload)
+  • Payload: sender phone, message type, body/media ID, timestamp
+  • Media types: text, image, audio (voice note), document, location
+
+PROCESS ───────────────────────────────────────────────────────────────
+  1. VERIFY      Recompute HMAC-SHA256(payload, APP_SECRET)
+                 → Compare against X-Hub-Signature-256 header
+                 → Mismatch: reject 403, log attempt
+  2. PARSE       Extract sender_phone, message_type, body, media_id
+  3. DOWNLOAD    If media → GET /v21.0/{media_id} → download binary
+                 If audio → pipe to Whisper API → text transcript
+  4. LOOKUP      sender_phone → contacts table → Mercedes-Benz
+                 → bound departments: [Purchase, Sales, QC]
+  5. STORE       Insert into messages table with conversation thread
+  6. ANALYZE     GPT-4o (temp=0.1, schema-enforced):
+                 → intent, urgency (1-5), entities[], suggestedReply
+  7. SYNC        Fire CESSP E_INBOUND event → all bound departments
+  8. NOTIFY      WebSocket push + WhatsApp forward to bound agents
+
+OUTPUT ────────────────────────────────────────────────────────────────
+  → messages table:     New row with body + llm_analysis JSONB
+  → WebSocket:          Real-time event to all connected dashboards
+  → WhatsApp forwards:  Summary sent to each bound agent's phone
+  → contacts.context_card: Updated unified timeline + entities
 ```
 
-**Signature verification:** Every webhook payload is verified using HMAC-SHA256 against the `WHATSAPP_APP_SECRET` via the `X-Hub-Signature-256` header. Unverified payloads are rejected with 403.
-
-**LLM analysis output (per inbound message):**
+**LLM analysis schema (stored in `messages.llm_analysis`):**
 ```typescript
 interface MessageAnalysis {
   intent:         string;     // "delivery_reschedule", "status_update", etc.
@@ -104,17 +124,32 @@ interface MessageAnalysis {
 
 Dispatches messages through the WhatsApp Cloud API on behalf of tagged agents.
 
-**Pre-dispatch checks:**
-1. Verify agent `authHash`
-2. Verify `send_permission(agent, contact)`
-3. Collision detection: check for outbound activity to same contact within `t_window` (default: 4 hours)
-4. If collision detected → warn agent, require confirmation
-5. Dispatch via API with role tag embedded
-6. Broadcast message preview to all peer agents in `V(contact)`
+```
+INPUT ─────────────────────────────────────────────────────────────────
+  Agent action (from dashboard or API):
+  • agent_id:       UUID of sending agent
+  • contact_phone:  recipient WhatsApp number
+  • body:           message text
+  • media_url:      optional attachment
 
-**Template vs. session messages:**
-- Within 24-hour conversation window → free-form session messages
-- Outside 24-hour window → pre-approved template messages only (Meta requirement)
+PROCESS ───────────────────────────────────────────────────────────────
+  1. AUTH          Verify agent authHash against system secret
+  2. PERMISSION    Check send_permission(agent, contact) in RBAC matrix
+  3. COLLISION     Query: any outbound to same contact within 4 hours?
+                   → If yes: warn agent, require confirmation
+  4. WINDOW        Check 24-hour conversation window with this contact
+                   → Inside window: send free-form session message
+                   → Outside window: must use pre-approved template
+  5. DISPATCH      POST /v21.0/{phone_number_id}/messages
+                   → Include role tag: "Micro Turner | Swagata | Purchase"
+  6. SYNC          Fire CESSP E_OUTBOUND to all OTHER bound departments
+
+OUTPUT ────────────────────────────────────────────────────────────────
+  → WhatsApp:           Message delivered to contact's phone
+  → messages table:     New row (direction: 'outbound', sender_agent_id)
+  → WebSocket:          Delivery status updates to sender's dashboard
+  → Peer agents:        Message preview broadcast via CESSP
+```
 
 ### 2.4 Scheduler Engine
 

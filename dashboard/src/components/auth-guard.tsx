@@ -11,6 +11,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (pathname === '/login') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- auth check runs on mount; localStorage is unavailable during SSR
       setChecked(true);
       return;
     }

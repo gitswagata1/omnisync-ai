@@ -1,24 +1,14 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import {
-  Contact,
-  Plus,
-  Search,
-  RefreshCw,
-  MessageSquare,
-  Calendar,
-  AlertTriangle,
-  ChevronRight,
-  X,
-} from 'lucide-react';
+import { Contact, Plus, Search, RefreshCw, MessageSquare, Calendar, AlertTriangle, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogTitle } from '@/components/ui/dialog';
 import { api } from '@/lib/api';
-import { cn, formatDate, timeAgo } from '@/lib/utils';
+import { cn, timeAgo } from '@/lib/utils';
 import type { Contact as ContactType, Message, Schedule, Escalation } from '@/lib/types';
 
 interface ContactContext {

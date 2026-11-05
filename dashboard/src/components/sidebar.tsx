@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
   MessageSquare,
@@ -28,6 +28,7 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
 
   return (
     <aside className="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col border-r border-zinc-800 bg-zinc-950">
@@ -77,7 +78,7 @@ export function Sidebar() {
             api.clearToken();
             if (typeof window !== 'undefined') {
               localStorage.removeItem('omnisync_agent');
-              window.location.href = '/login';
+              router.replace('/login');
             }
           }}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-zinc-500 hover:bg-red-900/20 hover:text-red-400 transition-colors"

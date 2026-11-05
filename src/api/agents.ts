@@ -30,7 +30,7 @@ agentsRouter.get(
       const agent = req.agent!;
       const where: Record<string, unknown> = { status: 'active' };
 
-      if (!(agent.permissions as string[]).includes('view_all')) {
+      if (!(agent.permissions).includes('view_all')) {
         where.department = agent.department;
       }
 
@@ -51,7 +51,7 @@ agentsRouter.get(
       });
 
       res.json({ agents });
-    } catch (err) {
+    } catch {
       res.status(500).json({ error: 'Failed to fetch agents' });
     }
   }
@@ -114,7 +114,7 @@ agentsRouter.post(
         },
         token,
       });
-    } catch (err) {
+    } catch {
       res.status(500).json({ error: 'Failed to create agent' });
     }
   }
@@ -147,7 +147,7 @@ agentsRouter.post(
         },
         token,
       });
-    } catch (err) {
+    } catch {
       res.status(500).json({ error: 'Login failed' });
     }
   }

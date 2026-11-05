@@ -42,27 +42,6 @@ export default function EscalationsPage() {
   const [filter, setFilter] = useState<FilterType>('all');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadData();
-    const socket = connectSocket();
-
-    socket.on('schedule_error', (data: { scheduleId: string; scheduleName: string; error: string }) => {
-      const newEsc: EscalationItem = {
-        id: `esc-${Date.now()}`,
-        scheduleId: data.scheduleId,
-        scheduleName: data.scheduleName,
-        reason: data.error || 'Schedule execution failed',
-        status: 'active',
-        createdAt: new Date().toISOString(),
-      };
-      setEscalations((prev) => [newEsc, ...prev]);
-    });
-
-    return () => {
-      socket.off('schedule_error');
-    };
-  }, []);
-
   async function loadData() {
     try {
       const data = await api.get<{ schedules: Schedule[] }>('/api/schedules');
@@ -124,6 +103,28 @@ export default function EscalationsPage() {
   });
 
   const activeCount = escalations.filter((e) => e.status === 'active' || e.status === 'acknowledged').length;
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- initial data load on mount; state is set after the async fetch resolves
+    loadData();
+    const socket = connectSocket();
+
+    socket.on('schedule_error', (data: { scheduleId: string; scheduleName: string; error: string }) => {
+      const newEsc: EscalationItem = {
+        id: `esc-${Date.now()}`,
+        scheduleId: data.scheduleId,
+        scheduleName: data.scheduleName,
+        reason: data.error || 'Schedule execution failed',
+        status: 'active',
+        createdAt: new Date().toISOString(),
+      };
+      setEscalations((prev) => [newEsc, ...prev]);
+    });
+
+    return () => {
+      socket.off('schedule_error');
+    };
+  }, []);
 
   if (loading) {
     return (
