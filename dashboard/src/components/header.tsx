@@ -1,13 +1,28 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Bell, Wifi, WifiOff } from 'lucide-react';
+import { Bell, Moon, Sun, Wifi, WifiOff } from 'lucide-react';
 import { getSocket } from '@/lib/socket';
 import { Badge } from './ui/badge';
 
 export function Header() {
   const [connected, setConnected] = useState(false);
   const [notifications, setNotifications] = useState(0);
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+
+  useEffect(() => {
+    setTheme(document.documentElement.classList.contains('light') ? 'light' : 'dark');
+  }, []);
+
+  function toggleTheme() {
+    const next = theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.classList.toggle('light', next === 'light');
+    document.documentElement.classList.toggle('dark', next === 'dark');
+    try {
+      localStorage.setItem('omnisync-theme', next);
+    } catch {}
+    setTheme(next);
+  }
 
   useEffect(() => {
     const socket = getSocket();
@@ -48,6 +63,15 @@ export function Header() {
             </Badge>
           )}
         </div>
+        <button
+          type="button"
+          onClick={toggleTheme}
+          aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+          title={theme === 'dark' ? 'Light theme' : 'Dark theme'}
+          className="rounded-lg p-2 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 transition-colors"
+        >
+          {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+        </button>
         <button
           className="relative rounded-lg p-2 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 transition-colors"
           onClick={() => setNotifications(0)}
