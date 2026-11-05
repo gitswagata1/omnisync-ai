@@ -16,16 +16,17 @@ import { setSocketServer } from './services/context-sync.js';
 import { setEscalationSocket } from './services/escalation.js';
 import { setRouterSocket } from './services/message-router.js';
 import { config } from './config/index.js';
+import { authenticateHeaders, AuthenticatedAgent } from './middleware/auth.js';
 import { logger } from './utils/logger.js';
 
 const app = express();
 const server = createServer(app);
 const io = new SocketServer(server, {
-  cors: { origin: '*' },
+  cors: { origin: config.dashboardOrigin, credentials: true },
 });
 
 app.use(helmet());
-app.use(cors());
+app.use(cors({ origin: config.dashboardOrigin, credentials: true }));
 app.use(express.json({ limit: '10mb' }));
 
 const apiLimiter = rateLimit({
@@ -47,13 +48,26 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok', version: '0.2.0', timestamp: new Date().toISOString() });
 });
 
-io.on('connection', (socket) => {
-  logger.info(`WebSocket connected: ${socket.id}`);
+// Sockets must present a valid session cookie (or Bearer token) during the handshake.
+io.use((socket, next) => {
+  authenticateHeaders(socket.handshake.headers)
+    .then((agent) => {
+      if (!agent) {
+        next(new Error('unauthorized'));
+        return;
+      }
+      socket.data.agent = agent;
+      next();
+    })
+    .catch(() => next(new Error('unauthorized')));
+});
 
-  socket.on('join_agent', (agentId: string) => {
-    void socket.join(`agent:${agentId}`);
-    logger.debug(`Socket ${socket.id} joined agent:${agentId}`);
-  });
+io.on('connection', (socket) => {
+  const agent = socket.data.agent as AuthenticatedAgent;
+  logger.info(`WebSocket connected: ${socket.id} (agent ${agent.id})`);
+
+  // Each agent may only join their own room.
+  void socket.join(`agent:${agent.id}`);
 
   socket.on('disconnect', () => {
     logger.debug(`WebSocket disconnected: ${socket.id}`);

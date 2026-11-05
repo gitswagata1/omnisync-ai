@@ -74,12 +74,9 @@ export function Sidebar() {
           Settings
         </Link>
         <button
-          onClick={() => {
-            api.clearToken();
-            if (typeof window !== 'undefined') {
-              localStorage.removeItem('omnisync_agent');
-              router.replace('/login');
-            }
+          onClick={async () => {
+            await api.logout().catch(() => undefined);
+            router.replace('/login');
           }}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-zinc-500 hover:bg-red-900/20 hover:text-red-400 transition-colors"
         >

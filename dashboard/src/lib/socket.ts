@@ -8,6 +8,7 @@ export function getSocket(): Socket {
   if (!socket) {
     socket = io(SOCKET_URL, {
       autoConnect: false,
+      withCredentials: true,
       transports: ['websocket', 'polling'],
     });
   }

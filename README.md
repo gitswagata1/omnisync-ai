@@ -475,7 +475,9 @@ Notes:
 - The API loads `.env` at startup via `dotenv`.
 - The dashboard's default dev port is 3000, which is also the API port. Pass `-p 3001` when both run on one machine.
 - Schema changes go through Prisma migrations in `prisma/migrations/`. Create one with `npx prisma migrate dev --name <change>`.
-- Demo logins use the seeded agent IDs printed by `npm run db:seed` (for example `550e8400-e29b-41d4-a716-446655440001`).
+- Sign in at `http://localhost:3001/login` with an agent email and password. `npm run db:seed` creates demo agents at `@microturner.test` addresses and prints their passwords once.
+- To set or reset a password: `AGENT_EMAIL=you@example.com AGENT_PASSWORD='...' npx tsx scripts/set-password.ts`. Use `AGENT_ID` instead of `AGENT_EMAIL` to onboard an existing agent that has no email yet. Passwords must be at least 12 characters.
+- Creating agents requires an admin session (an agent with the `view_all` permission) through `POST /api/agents`.
 - The dashboard supports light and dark themes. Use the sun/moon button in the header; the choice is saved in the browser.
 
 ### Configure Webhook
