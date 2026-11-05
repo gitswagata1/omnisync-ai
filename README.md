@@ -632,8 +632,9 @@ omnisync-ai/
 - [x] Patent provisional specifications filed (×3)
 - [x] IEEE Access paper submitted
 - [x] Docker deployment support
-- [x] **Next.js 16 enterprise dashboard** (8 pages, real-time Socket.IO, auth, dark theme)
+- [x] **Next.js 16 enterprise dashboard** (8 pages, real-time Socket.IO, auth, light and dark themes)
 - [x] Enterprise & Investor Pitch Package (10-slide deck, boardroom script, Q&A handlers)
+- [x] Backend and dashboard pass type checking, lint, tests and production builds in CI
 - [ ] Multi-tenant SaaS infrastructure
 - [ ] Self-serve onboarding flow
 - [ ] Fine-tuned LLM for manufacturing domain
@@ -641,6 +642,8 @@ omnisync-ai/
 - [ ] ERP integration (SAP, Tally)
 - [ ] On-premises deployment option
 - [ ] Mobile dashboard app
+- [ ] Prisma migration files (the schema is currently applied with `prisma db push`)
+- [ ] Hosted deployment of the API and dashboard
 
 <br/>
 
