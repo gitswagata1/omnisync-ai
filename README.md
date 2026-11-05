@@ -132,11 +132,7 @@ OmniSync AI operates as an intelligent layer over a single WhatsApp Business Clo
 
 ## Demo
 
-> **Screenshots and demo GIF coming soon** — the dashboard, scheduler, and VP digest in action.
-
-<p align="center">
-  <img src="docs/diagrams/demo-placeholder.png" alt="OmniSync AI Dashboard Demo" width="800"/>
-</p>
+> **Dashboard is live** — real-time message feeds, schedule management, agent RBAC, contact context cards, executive analytics, and escalation tracking. Run `cd dashboard && npm run dev` to launch.
 
 <br/>
 
@@ -201,7 +197,7 @@ Deployed and validated in a live manufacturing environment over **8 weeks** (2 w
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│  FRONTEND DASHBOARD                          Next.js 14 + Socket.IO    │
+│  FRONTEND DASHBOARD                          Next.js 16 + Socket.IO    │
 │  ┌──────────┐  ┌───────────┐  ┌──────────┐  ┌───────────────────────┐ │
 │  │ Live Feed│  │ Scheduler │  │  Agent   │  │  Analytics & Digests  │ │
 │  └─────┬────┘  └─────┬─────┘  └─────┬────┘  └───────────┬───────────┘ │
@@ -264,7 +260,7 @@ cp .env.example .env
 docker compose up -d
 ```
 
-This starts the app, PostgreSQL, and Redis with a single command. The API is available at `http://localhost:3000`.
+This starts the backend API, dashboard, PostgreSQL, and Redis. The API is at `http://localhost:3000`, the dashboard at `http://localhost:3001`.
 
 ### Option B: Manual Setup
 
@@ -277,7 +273,13 @@ cp .env.example .env
 
 npm run db:migrate
 npm run db:seed        # loads demo agents, contacts, and schedules
-npm run dev            # starts dev server with hot reload
+npm run dev            # starts backend with hot reload
+
+# In a second terminal:
+cd dashboard
+npm install
+cp .env.example .env
+npm run dev            # starts dashboard at http://localhost:3000
 ```
 
 ### Configure Webhook
@@ -333,46 +335,54 @@ See [`.env.example`](.env.example) for the full list. Key variables:
 
 ```
 omnisync-ai/
-├── src/
-│   ├── api/                    # Express route handlers
-│   │   ├── webhook.ts          # WhatsApp webhook receiver
-│   │   ├── messages.ts         # Send/receive message endpoints
-│   │   ├── schedules.ts        # Scheduler CRUD
-│   │   ├── agents.ts           # Agent identity management
-│   │   ├── contacts.ts         # Contact & department binding
-│   │   └── analytics.ts        # Reporting & metrics
-│   ├── services/               # Core business logic
-│   │   ├── agent-identity.ts   # HMAC-secured role tag system
-│   │   ├── message-router.ts   # Inbound demux / outbound mux
-│   │   ├── scheduler-engine.ts # Bull queue + cron + state machine
-│   │   ├── llm-evaluator.ts    # Response evaluation + digest gen
-│   │   ├── context-sync.ts     # CESSP implementation
-│   │   ├── escalation.ts       # Timeout detection + escalation
-│   │   └── transcription.ts    # Whisper audio → text
-│   ├── models/                 # Database models (Prisma)
-│   ├── middleware/              # Auth, validation, rate limiting
-│   ├── config/                 # Environment & app configuration
-│   └── utils/                  # Shared utilities
-├── docs/                       # Technical documentation
-│   ├── architecture.md         # Full system architecture spec
-│   └── api-reference/          # Endpoint documentation
-├── research/                   # Academic research
-│   ├── ieee_paper_draft.md     # IEEE Access paper (full draft)
-│   └── data/                   # Pilot measurement data
-├── patents/                    # Intellectual property
-│   ├── patent_claims.md        # Formal utility patent claims
-│   ├── disclosures/            # Invention Disclosure Forms
-│   └── prior-art/              # Prior art analysis
-├── pitch/                      # Venture strategy
-│   ├── vc_deck_outline.md      # 12-slide investor deck
-│   └── financials/             # Unit economics & projections
-├── scripts/                    # Seed data & utilities
-├── tests/                      # Unit & integration tests
-├── Dockerfile                  # Multi-stage production build
-├── docker-compose.yml          # Full local dev stack
-├── .env.example
-├── package.json
-└── tsconfig.json
+├── src/                         # Backend (Node.js + Express + TypeScript)
+│   ├── api/                     # Express route handlers
+│   │   ├── webhook.ts           # WhatsApp webhook receiver
+│   │   ├── messages.ts          # Send/receive message endpoints
+│   │   ├── schedules.ts         # Scheduler CRUD
+│   │   ├── agents.ts            # Agent identity management
+│   │   ├── contacts.ts          # Contact & department binding
+│   │   └── analytics.ts         # Reporting & metrics
+│   ├── services/                # Core business logic
+│   │   ├── agent-identity.ts    # HMAC-secured role tag system
+│   │   ├── message-router.ts    # Inbound demux / outbound mux
+│   │   ├── scheduler-engine.ts  # Bull queue + cron + state machine
+│   │   ├── scheduler-fsm.ts     # Pure 9-state FSM (no side effects)
+│   │   ├── llm-evaluator.ts     # Response evaluation + digest gen
+│   │   ├── context-sync.ts      # CESSP implementation
+│   │   ├── escalation.ts        # Timeout detection + escalation
+│   │   └── transcription.ts     # Whisper audio → text
+│   ├── middleware/               # Auth (JWT), validation (Zod)
+│   ├── config/                  # Typed environment config
+│   └── utils/                   # Logger (Winston)
+├── dashboard/                   # Frontend (Next.js 16 + Tailwind 4)
+│   └── src/
+│       ├── app/                 # App Router pages
+│       │   ├── page.tsx         # Dashboard overview + live activity
+│       │   ├── messages/        # WhatsApp-style message center
+│       │   ├── schedules/       # Schedule CRUD table
+│       │   ├── agents/          # Agent card grid + management
+│       │   ├── contacts/        # Contact list + CCV viewer
+│       │   ├── analytics/       # Executive digests + metrics
+│       │   ├── escalations/     # Escalation tracker
+│       │   ├── login/           # Auth flow (login + register)
+│       │   └── settings/        # API config + system info
+│       ├── components/          # Sidebar, header, auth guard, UI kit
+│       └── lib/                 # API client, Socket.IO, types, utils
+├── prisma/
+│   └── schema.prisma            # 8 models, indexes, relations
+├── tests/                       # 97 tests (vitest)
+│   ├── unit/                    # FSM, identity, webhook, sync
+│   └── integration/             # API endpoint tests
+├── docs/                        # Architecture spec + API reference
+├── research/                    # IEEE paper + pilot metrics
+├── patents/                     # 3 IDFs + claims + prior art
+├── pitch/                       # Investor deck + financials + boardroom script
+├── scripts/seed.ts              # Demo data seeder
+├── Dockerfile                   # Multi-stage backend build
+├── dashboard/Dockerfile         # Multi-stage dashboard build
+├── docker-compose.yml           # Full stack (app + dashboard + PG + Redis)
+└── .github/workflows/ci.yml     # CI: backend tests + dashboard build
 ```
 
 <br/>
@@ -391,6 +401,7 @@ omnisync-ai/
 | [`patents/prior-art/analysis.md`](patents/prior-art/analysis.md) | Competitive prior art analysis across 6 platforms |
 | [`pitch/vc_deck_outline.md`](pitch/vc_deck_outline.md) | 12-slide investor pitch deck with market sizing and unit economics |
 | [`pitch/financials/`](pitch/financials/) | Detailed unit economics and 3-year financial projections |
+| [`pitch/ENTERPRISE_PITCH_PACKAGE.md`](pitch/ENTERPRISE_PITCH_PACKAGE.md) | 10-slide investor deck, MD boardroom script, and Q&A objection handlers |
 
 <br/>
 
@@ -425,6 +436,8 @@ omnisync-ai/
 - [x] Patent provisional specifications filed (×3)
 - [x] IEEE Access paper submitted
 - [x] Docker deployment support
+- [x] **Next.js 16 enterprise dashboard** (8 pages, real-time Socket.IO, auth, dark theme)
+- [x] Enterprise & Investor Pitch Package (10-slide deck, boardroom script, Q&A handlers)
 - [ ] Multi-tenant SaaS infrastructure
 - [ ] Self-serve onboarding flow
 - [ ] Fine-tuned LLM for manufacturing domain
@@ -441,7 +454,7 @@ omnisync-ai/
 
 | Layer | Technology |
 |:------|:-----------|
-| **Frontend** | Next.js 14, React, Tailwind CSS, shadcn/ui, Socket.IO |
+| **Frontend** | Next.js 16, React 19, Tailwind CSS 4, Socket.IO Client |
 | **Backend** | Node.js, Express, TypeScript |
 | **Scheduler** | Bull (Redis-backed), node-cron |
 | **Database** | PostgreSQL 16, Prisma ORM |

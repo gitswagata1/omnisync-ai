@@ -1,6 +1,6 @@
 {
   "name": "omnisync-ai",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Enterprise WhatsApp multi-agent operations and executive intelligence platform",
   "main": "dist/index.js",
   "scripts": {

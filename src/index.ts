@@ -43,7 +43,7 @@ app.use('/api/contacts', contactsRouter);
 app.use('/api/analytics', analyticsRouter);
 
 app.get('/health', (_req, res) => {
-  res.json({ status: 'ok', version: '0.1.0', timestamp: new Date().toISOString() });
+  res.json({ status: 'ok', version: '0.2.0', timestamp: new Date().toISOString() });
 });
 
 io.on('connection', (socket) => {

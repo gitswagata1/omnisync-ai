@@ -7,8 +7,10 @@ COPY package.json package-lock.json* ./
 RUN npm ci
 
 COPY tsconfig.json ./
+COPY prisma/ ./prisma/
 COPY src/ ./src/
 
+RUN npx prisma generate
 RUN npm run build
 
 # ---- Production Stage ----
@@ -25,6 +27,8 @@ COPY package.json package-lock.json* ./
 RUN npm ci --omit=dev && npm cache clean --force
 
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY prisma/ ./prisma/
 
 RUN chown -R omnisync:omnisync /app
 USER omnisync

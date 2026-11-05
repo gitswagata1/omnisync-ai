@@ -11,7 +11,7 @@ OmniSync AI is a three-tier application that operates as an intelligent coordina
 ```
 ┌───────────────────────────────────────────────────────────────────────┐
 │                      PRESENTATION TIER                                │
-│   Next.js 14 Dashboard + Socket.IO Real-Time                         │
+│   Next.js 16 Dashboard + Socket.IO Real-Time + Auth Guard            │
 │   ┌──────────┐ ┌───────────┐ ┌──────────┐ ┌───────────────────────┐  │
 │   │ Live Feed│ │ Scheduler │ │ Agent    │ │ Analytics & Digests   │  │
 │   │ View     │ │ Manager   │ │ Manager  │ │                       │  │
