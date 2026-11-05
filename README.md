@@ -431,6 +431,8 @@ Deployed and validated in a live manufacturing environment over **8 weeks** (2 w
 
 ### Option A: Docker (Recommended)
 
+> **Known issue:** the backend image does not currently build because `npm run build` (`tsc`) reports type errors in `src/`. Until those are fixed, use Option B for the backend and run only the database services with Docker, as shown below.
+
 ```bash
 git clone https://github.com/gitswagata1/omnisync-ai.git
 cd omnisync-ai
@@ -440,7 +442,13 @@ cp .env.example .env
 docker compose up -d
 ```
 
-This starts the backend API, dashboard, PostgreSQL, and Redis. The API is at `http://localhost:3000`, the dashboard at `http://localhost:3001`.
+Once the build issue is fixed, this starts the backend API, dashboard, PostgreSQL, and Redis. The API is at `http://localhost:3000`, the dashboard at `http://localhost:3001`.
+
+To run only PostgreSQL and Redis for Option B:
+
+```bash
+docker compose up -d postgres redis
+```
 
 ### Option B: Manual Setup
 
@@ -449,18 +457,28 @@ git clone https://github.com/gitswagata1/omnisync-ai.git
 cd omnisync-ai
 npm install
 cp .env.example .env
-# Edit .env with your credentials
+# Edit .env with your credentials. Generate JWT_SECRET and SYSTEM_SECRET
+# with a random value of at least 32 characters.
 
-npm run db:migrate
-npm run db:seed        # loads demo agents, contacts, and schedules
-npm run dev            # starts backend with hot reload
+docker compose up -d postgres redis   # or run your own Postgres 16 and Redis 7
+
+npx prisma db push                    # the repo has no migration files yet
+npm run db:seed                       # loads demo agents, contacts, and schedules
+npx tsx --env-file=.env src/index.ts  # starts the API on http://localhost:3000
 
 # In a second terminal:
 cd dashboard
 npm install
 cp .env.example .env
-npm run dev            # starts dashboard at http://localhost:3000
+npm run dev -- -p 3001                # dashboard at http://localhost:3001
 ```
+
+Notes:
+- `npm run dev` runs `tsx watch src/index.ts`, which does not load `.env` by itself. The backend reads `JWT_SECRET` from `process.env`, so without `--env-file=.env` login fails with a 500 error. Use the command above or add `dotenv`.
+- The dashboard's default dev port is 3000, which is also the API port. Pass `-p 3001` when both run on one machine.
+- `npm run db:migrate` (`prisma migrate deploy`) requires migration files, which the repo does not include yet. Use `npx prisma db push` for a local database.
+- Demo logins use the seeded agent IDs printed by `npm run db:seed` (for example `550e8400-e29b-41d4-a716-446655440001`).
+- The dashboard supports light and dark themes. Use the sun/moon button in the header; the choice is saved in the browser.
 
 ### Configure Webhook
 
