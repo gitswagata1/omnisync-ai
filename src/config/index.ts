@@ -37,6 +37,8 @@ export const config = {
     ),
   },
 
+  dashboardOrigin: process.env.DASHBOARD_ORIGIN || 'http://localhost:3001',
+
   auth: {
     jwtSecret: process.env.JWT_SECRET || '',
     jwtExpiry: process.env.JWT_EXPIRY || '24h',

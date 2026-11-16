@@ -4,27 +4,36 @@ import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 
+/**
+ * Renders the dashboard only once the API confirms the session cookie. The
+ * proxy already redirects requests without a cookie; this covers expired or
+ * revoked sessions.
+ */
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [checked, setChecked] = useState(false);
+  const isLogin = pathname === '/login';
+  const [verified, setVerified] = useState(isLogin);
 
   useEffect(() => {
-    if (pathname === '/login') {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- auth check runs on mount; localStorage is unavailable during SSR
-      setChecked(true);
-      return;
-    }
+    if (isLogin) return;
 
-    const token = api.getToken();
-    if (!token) {
-      router.replace('/login');
-    } else {
-      setChecked(true);
-    }
-  }, [pathname, router]);
+    let cancelled = false;
+    api
+      .me()
+      .then(() => {
+        if (!cancelled) setVerified(true);
+      })
+      .catch(() => {
+        if (!cancelled) router.replace('/login');
+      });
 
-  if (!checked && pathname !== '/login') {
+    return () => {
+      cancelled = true;
+    };
+  }, [isLogin, router]);
+
+  if (!verified) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-950">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-700 border-t-emerald-500" />

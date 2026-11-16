@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import crypto from 'crypto';
+import crypto, { randomBytes } from 'crypto';
+import { hashPassword } from '../src/lib/password.js';
 
 const prisma = new PrismaClient();
 
@@ -109,19 +110,34 @@ async function seed(): Promise<void> {
   console.log('Seeding OmniSync AI database...\n');
 
   console.log('--- Agents ---');
+  const newCredentials: { email: string; password: string }[] = [];
   for (const data of AGENTS) {
     const authHash = hashAgent(data.id, data.role, data.department);
     const roleTag = `${data.company} | ${data.userName} | ${data.department}`;
+    const email = `${data.userName.toLowerCase().replace(/\s+/g, '.')}@microturner.test`;
+
+    const existing = await prisma.agent.findUnique({ where: { id: data.id } });
+    if (existing?.passwordHash) {
+      console.log(`  Exists: ${roleTag} (password unchanged)`);
+      continue;
+    }
+
+    // Generated once and printed a single time. Only the hash is stored.
+    const password = randomBytes(12).toString('base64url');
+    const passwordHash = await hashPassword(password);
 
     await prisma.agent.upsert({
       where: { id: data.id },
-      update: {},
+      update: { email, passwordHash },
       create: {
         ...data,
+        email,
+        passwordHash,
         roleTag,
         authHash,
       },
     });
+    newCredentials.push({ email, password });
     console.log(`  Created: ${roleTag}`);
   }
 
@@ -158,10 +174,13 @@ async function seed(): Promise<void> {
     console.log(`  Created: ${data.name} [${data.cronExpression}]`);
   }
 
-  console.log('\nSeed complete. Agent IDs for login:');
-  for (const a of AGENTS) {
-    console.log(`  ${a.userName} (${a.department}): ${a.id}`);
+  if (newCredentials.length > 0) {
+    console.log('\nLogin credentials (shown once, save them now):');
+    for (const c of newCredentials) {
+      console.log(`  ${c.email}  password: ${c.password}`);
+    }
   }
+  console.log('\nSeed complete.');
 }
 
 seed()
